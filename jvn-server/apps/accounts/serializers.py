@@ -1,0 +1,114 @@
+from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password as django_validate_password
+from django.core.exceptions import ValidationError
+from core.validator import *
+from .models import Account, JobSeeker, Company, Follow
+
+PUBLIC_ROLE_CHOICES = (
+        ("SEEKER", "Nguoi tim viec"),
+        ("COMPANY", "Nha tuyen dung"),
+)
+class RegisterSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only = True,min_length = 6,validators =[validate_strong_password])
+    role = serializers.ChoiceField(choices=PUBLIC_ROLE_CHOICES)
+    name = serializers.CharField(max_length = 255)
+    province = serializers.CharField(max_length = 100,required = False, allow_blank = True)
+    ward = serializers.CharField(max_length = 255,required = False,allow_blank = True)
+    tel = serializers.CharField(max_length =15,required = False, allow_blank = True,validators = [validate_tel])
+    def validate_email(self, value):
+        if Account.objects.filter(email = value).exists():
+            raise serializers.ValidationError("Email nay da ton tai")
+        return value
+    
+    def validate(self, data):
+        role = data.get("role")
+        province = data.get('province')
+        ward = data.get('ward')
+        tel = data.get('tel')
+        if role == "COMPANY" and (not province or not ward or not tel):
+            raise serializers.ValidationError("Vui long dien day du thong tin")
+        return data
+    
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only = True)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required = True,write_only = True)
+    new_password = serializers.CharField(
+        required = True,
+        write_only = True,
+        validators = [validate_strong_password]
+    )
+    confirm_new_password = serializers.CharField(required = True,write_only = True)
+
+    def validate(self, data):
+        if data.get('new_password') == data.get('old_password'):
+            raise serializers.ValidationError('Vui long nhap mat khau khac mat khau cu')
+        elif data.get('new_password') != data.get('confirm_new_password'):
+            raise serializers.ValidationError("Mat khau xac nhan khon chinh xac. Vui long kiem tra lai")
+        return data
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(required= True)
+
+class GoogleLoginSerializer(serializers.Serializer):
+    google_token = serializers.CharField(required = True) 
+    role = serializers.ChoiceField(
+        choices=PUBLIC_ROLE_CHOICES,
+        required = False,
+        allow_null = True
+    )   
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required = True)
+
+class ResetPasswordSerializer(serializers.Serializer):
+    uid = serializers.CharField(required = True)
+    token = serializers.CharField(required = True)
+    new_password = serializers.CharField(required = True,validators = [validate_strong_password])
+    confirm_new_password = serializers.CharField(required = True)
+    def validate(self, data):
+        if data.get('new_password') != data.get('confirm_new_password'):
+            raise serializers.ValidationError({"confirm_new_password":'Mat khau khong khop vui long nhap lai'})
+        return data
+
+
+class SeekerDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobSeeker
+        fields = ['github_urls']
+
+class CompanyDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['province','ward','exact_address','description','headcount']
+
+class AccountDetailSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+    class Meta:
+        model = Account
+        fields = ['id','email','name','tel','profile']
+
+    def get_profile(self,obj):
+        if obj.role == 'SEEKER':
+            return SeekerDetailSerializer(obj.jobseeker).data
+        elif obj.role == 'COMPANY':
+            return CompanyDetailSerializer(obj.company).data
+        else:
+            return None
+
+class UpdateDetailSerializer(serializers.Serializer):
+    tel = serializers.CharField(max_length =15,required = False, allow_blank = True,validators = [validate_tel])
+    name = serializers.CharField(max_length = 255, required = False)
+    #Cho Seeker
+    github_urls = serializers.CharField(max_length = 100,required = False, allow_blank=True)
+    #Cho Company
+    province = serializers.CharField(max_length = 100,required = False, allow_blank = True)
+    ward = serializers.CharField(max_length = 255,required = False,allow_blank = True)
+    exact_address = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    headcount = serializers.IntegerField(required=False)
+   
