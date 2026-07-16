@@ -4,6 +4,7 @@ from .models import CV,Tag
 from accounts.models import Account
 from rest_framework.exceptions import ValidationError,PermissionDenied
 from django.shortcuts import get_object_or_404
+from core.permission import get_owend_or_403
 
 @transaction.atomic
 def create_cv_service(*,user:Account, data:dict):
@@ -53,4 +54,31 @@ def set_default_service(*,user:Account,cv_id:int):
     CV.objects.filter(job_seeker = job_seeker, is_default = True).update(is_default = False)
     cv.is_default = True
     cv.save(update_fields=['is_default'])
+    return cv
+
+@transaction.atomic
+def update_cv_service(*,user:Account,data:dict,cv_id:int):
+    cv = get_object_or_404(CV,id = cv_id)
+    get_owend_or_403(obj=cv,owner_field='jobseeker',expected_owner=user.jobseeker)
+    if 'file' in data:
+        new_file = data.pop('file')
+        if cv.file:
+            try:
+                cloudinary.uploader.destroy(cv.file.name)
+            except Exception as e:
+                print(f'Loi {e} khong the xoa file cu tren cloudinary')
+        cv.file = new_file
+
+    for field, value in data.items():
+        if field != 'tag_ids':
+            setattr(cv, field, value)
+    cv.save()
+
+    if 'tag_ids' in data:
+        tag_ids = data['tag_ids']
+        tags = Tag.objects.filter(id__in=tag_ids)
+        if tags.count() != len(set(tag_ids)):
+            raise ValidationError({'tag_ids': 'Mot so tag_id khong ton tai'})
+        cv.tags.set(tags)
+
     return cv

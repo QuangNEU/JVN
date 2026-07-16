@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.exceptions import ValidationError
-from .serializers import TagSerializer,CVCreateSerializer,CVSerializer
+from .serializers import TagSerializer,CVCreateSerializer,CVSerializer,CVUpdateSerializer
 from .selectors import get_cv_list_service,get_cv_selector
-from .services import create_cv_service,delete_cv_service,set_default_service
+from .services import create_cv_service,delete_cv_service,set_default_service,update_cv_service
 # Create your views here.
 
 class CVManageView(APIView):
@@ -47,3 +47,12 @@ class CVSetDefaultView(APIView):
             "cv_id": cv.id,
             "is_default": cv.is_default
         },status=status.HTTP_200_OK)
+    
+class CVUpdateView(APIView):
+    permission_classes=[IsAuthenticated]
+    def patch(self,request,cv_id):
+        serializer = CVUpdateSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        update_cv_service(user=request.user,data= data,cv_id=cv_id)
+        return Response({'message':'Cap nhat cv thanh cong'},status=status.HTTP_200_OK)

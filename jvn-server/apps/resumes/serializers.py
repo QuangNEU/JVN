@@ -21,3 +21,13 @@ class CVCreateSerializer(serializers.Serializer):
         required = False,
         allow_empty = True
     )
+
+class CVUpdateSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length = 255,required = False)
+    file = serializers.FileField(required = False)
+    level = serializers.ChoiceField(CV.LEVEL_CHOICES,required = False)
+    tag_ids = serializers.ListField(
+        child = serializers.IntegerField(),
+        required = False,
+        allow_empty = True
+    )
