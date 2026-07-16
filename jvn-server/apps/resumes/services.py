@@ -82,3 +82,10 @@ def update_cv_service(*,user:Account,data:dict,cv_id:int):
         cv.tags.set(tags)
 
     return cv
+
+def public_cv_service(*,user:Account,cv_id:int):
+    cv = get_object_or_404(CV,id = cv_id)
+    get_owend_or_403(obj=cv,owner_field='jobseeker',expected_owner=user.jobseeker)
+    cv.is_public = not cv.is_public
+    cv.save(update_fields=['is_public'])
+    return cv

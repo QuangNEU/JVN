@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from .serializers import TagSerializer,CVCreateSerializer,CVSerializer,CVUpdateSerializer
 from .selectors import get_cv_list_service,get_cv_selector
-from .services import create_cv_service,delete_cv_service,set_default_service,update_cv_service
+from .services import create_cv_service,delete_cv_service,set_default_service,update_cv_service,public_cv_service
 # Create your views here.
 
 class CVManageView(APIView):
@@ -56,3 +56,13 @@ class CVUpdateView(APIView):
         data = serializer.validated_data
         update_cv_service(user=request.user,data= data,cv_id=cv_id)
         return Response({'message':'Cap nhat cv thanh cong'},status=status.HTTP_200_OK)
+    
+class CVPublicView(APIView):
+    permission_classes= [IsAuthenticated]
+    def post(self,request,cv_id):
+        cv = public_cv_service(user=request.user,cv_id=cv_id)
+        status_text = "công khai" if cv.is_public else "ẩn"
+        return Response({
+            "message": f"Đã {status_text} CV '{cv.title}'.",
+            "is_public": cv.is_public
+        },status=status.HTTP_200_OK)
