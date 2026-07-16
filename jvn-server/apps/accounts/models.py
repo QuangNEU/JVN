@@ -54,7 +54,8 @@ class Company(models.Model):
     province = models.CharField(max_length=100)
     ward = models.CharField(max_length=100)
     exact_address = models.CharField(max_length=255, blank=True, null=True) 
-
+    logo = models.FileField(upload_to='logos/', blank=True, null=True)
+    
     def __str__(self):
         return self.account.name
 
