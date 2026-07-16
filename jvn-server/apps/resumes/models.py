@@ -20,6 +20,6 @@ class CV(models.Model):
     level = models.CharField(max_length=20,choices=LEVEL_CHOICES)
     tags = models.ManyToManyField(Tag,related_name='cvs',blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    is_default = models.BooleanField(default=False)
     def __str__(self):
         return self.title

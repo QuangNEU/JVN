@@ -26,15 +26,31 @@ def create_cv_service(*,user:Account, data:dict):
 def delete_cv_service(*,user:Account,cv_id:int):
     if user.role != 'SEEKER':
         raise PermissionDenied({'detail':'Chi ung vien moi co the xoa CV'})
-    jobseeker = user.jobseerker
+    jobseeker = user.jobseeker
     cv = get_object_or_404(CV,id= cv_id)
-    if cv.job_seeker != user.jobseeker:
+    file_public_id = cv.file.public_id if cv.file else None
+    if cv.job_seeker != jobseeker:
         raise PermissionDenied({'detail':'Chi co chu so huu moi co the xoa'})
-    if cv.file:
+    cv.delete()
+    if  file_public_id:
         try:
-            public_id = cv.file.public_id
+            public_id = file_public_id
             cloudinary.uploader.destroy(public_id)
         except Exception as e:
-            pass
-    cv.delete()
+            raise ValidationError({'detail':f'Khong the xoa CV do {e}'})
     return True
+
+@transaction.atomic
+def set_default_service(*,user:Account,cv_id:int):
+    if not hasattr(user,'jobseeker'):
+        raise PermissionDenied({'detail':'Khong co quyen han'})
+    job_seeker = user.jobseeker
+
+    cv = get_object_or_404(CV,id=cv_id)
+    if cv.job_seeker != job_seeker:
+        raise PermissionDenied({'detail':'Khong co quyen han'})
+    
+    CV.objects.filter(job_seeker = job_seeker, is_default = True).update(is_default = False)
+    cv.is_default = True
+    cv.save(update_fields=['is_default'])
+    return cv
