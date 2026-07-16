@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import *
-from .services import *
-from .selectors import *
+from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer
+from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password
+from .selectors import get_profile_detail_selector
 
 # Create your views here.
 class RegisterView(APIView):

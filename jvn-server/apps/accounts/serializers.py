@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password as django_validate_password
 from django.core.exceptions import ValidationError
-from core.validator import *
+from core.validator import validate_strong_password,validate_tel
 from .models import Account, JobSeeker, Company, Follow
 
 PUBLIC_ROLE_CHOICES = (
