@@ -4,11 +4,11 @@ from .models import CV,Tag
 from accounts.models import Account
 from rest_framework.exceptions import ValidationError,PermissionDenied
 from django.shortcuts import get_object_or_404
-from core.permission import get_owend_or_403
+from core.permission import get_owned_or_403
 
 @transaction.atomic
 def create_cv_service(*,user:Account, data:dict):
-    if user.role != 'SEEKER':
+    if user.role != Account.ROLE_CHOICES.SEEKER:
         raise ValidationError({'detail':'Chi ung vien moi co the tai len CV'})
     job_seeker = user.jobseeker
     cv = CV.objects.create(
@@ -25,7 +25,7 @@ def create_cv_service(*,user:Account, data:dict):
 
 @transaction.atomic
 def delete_cv_service(*,user:Account,cv_id:int):
-    if user.role != 'SEEKER':
+    if user.role != Account.ROLE_CHOICES.SEEKER:
         raise PermissionDenied({'detail':'Chi ung vien moi co the xoa CV'})
     jobseeker = user.jobseeker
     cv = get_object_or_404(CV,id= cv_id)
@@ -59,7 +59,7 @@ def set_default_service(*,user:Account,cv_id:int):
 @transaction.atomic
 def update_cv_service(*,user:Account,data:dict,cv_id:int):
     cv = get_object_or_404(CV,id = cv_id)
-    get_owend_or_403(obj=cv,owner_field='jobseeker',expected_owner=user.jobseeker)
+    get_owned_or_403(user=user,profile_attr='jobseeker',obj=cv,owner_field='job_seeker')
     if 'file' in data:
         new_file = data.pop('file')
         if cv.file:
@@ -85,7 +85,7 @@ def update_cv_service(*,user:Account,data:dict,cv_id:int):
 
 def public_cv_service(*,user:Account,cv_id:int):
     cv = get_object_or_404(CV,id = cv_id)
-    get_owend_or_403(obj=cv,owner_field='jobseeker',expected_owner=user.jobseeker)
+    get_owned_or_403(user=user,profile_attr='jobseeker',obj=cv,owner_field='job_seeker')
     cv.is_public = not cv.is_public
     cv.save(update_fields=['is_public'])
-    return cv
+    return cv 

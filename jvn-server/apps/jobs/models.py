@@ -3,13 +3,12 @@ from accounts.models import Account,Company
 from resumes.models import CV,Tag
 # Create your models here.
 class Category(models.Model):
-    STATUS = (
-        ('PENDING','Dang cho duyet'),
-        ('APPROVED','Dong y'),
-        ('REJECTED','Da bi tu choi')
-    )
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Đang chờ duyệt'
+        APPROVED = 'APPROVED', 'Đồng ý'
+        REJECTED = 'REJECTED', 'Đã bị từ chối'
     title = models.CharField(max_length=255)
-    status = models.CharField(max_length=50,choices=STATUS,default='PENDING')
+    status = models.CharField(max_length=50,choices=Status.choices,default='PENDING')
     created_by = models.ForeignKey(Account, on_delete=models.SET_NULL,null=True,related_name='created_category')
     parent = models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True,related_name='children')
     created_at =models.DateTimeField(auto_now=True)
@@ -19,16 +18,16 @@ class Category(models.Model):
     
 class JobPost(models.Model):
     LEVEL_CHOICES = CV.LEVEL_CHOICES
-    STATUS=(
-        ("PUBLISHED","Dang mo"),
-        ("CLOSED",'Da dong')
-    )
-    TYPE=(
-        ('FULLTIME','Toan thoi gian'),
-        ('PARTTIME','Ban thoi gian'),
-        ('HYBRID','Hon hop'),
-        ('REMOTE','Lam viec tu xa'),
-    )
+    class STATUS(models.TextChoices):
+        PUBLISH = "PUBLISHED","Dang mo",
+        CLOSED = "CLOSED",'Da dong'
+    
+    class TYPE(models.TextChoices):
+        FULLTIME = 'FULLTIME','Toan thoi gian',
+        PARTTIME = 'PARTTIME','Ban thoi gian',
+        HYBRID = 'HYBRID','Hon hop',
+        REMOTE = 'REMOTE','Lam viec tu xa',
+    
     title = models.CharField(max_length=200)
     descriptions = models.TextField()
     requirement = models.TextField()

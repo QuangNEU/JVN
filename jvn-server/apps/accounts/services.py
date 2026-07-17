@@ -28,9 +28,9 @@ def create_user_service(*,email,password,role,name,tel = None,province = None,wa
                 name = name
             )
 
-            if role == "SEEKER":
+            if role == Account.ROLE_CHOICES.SEEKER:
                 JobSeeker.objects.create(account = account)
-            elif role == 'COMPANY':
+            elif role == Account.ROLE_CHOICES.COMPANY:
                 Company.objects.create(account = account,province = province,ward = ward)     
             else:
                 raise ValueError(f"Role khong hop le:{role}")    
@@ -59,7 +59,7 @@ def update_my_detail_service(*, account: Account, data: dict):
         updated_field.append('name')
     if updated_field:
         account.save(update_fields=updated_field)
-    if account.role == "SEEKER" and hasattr(account, 'jobseeker'):
+    if account.role == Account.ROLE_CHOICES.SEEKER and hasattr(account, 'jobseeker'):
         seeker = account.jobseeker
         updated = False
         for field in ALLOWED_SEEKER_FIELDS:
@@ -68,7 +68,7 @@ def update_my_detail_service(*, account: Account, data: dict):
                 updated = True
         if updated == True:
             seeker.save()
-    elif account.role == 'COMPANY' and hasattr(account,'company'):
+    elif account.role == Account.ROLE_CHOICES.COMPANY and hasattr(account,'company'):
         company = account.company
         updated = False
         for field in ALLOWED_COMPANY_FIELDS:
@@ -120,7 +120,7 @@ def google_login_service(*, google_token:str,role:str):
         
         default_province = ""
         default_ward = ""
-        if role == "COMPANY":
+        if role == Account.ROLE_CHOICES.COMPANY:
             default_province="Cap nhat sau"
             default_ward = "Cap nhat sau"
         
@@ -178,7 +178,7 @@ def reset_password_service(*, data:dict):
         raise ValidationError({'token':'Duong dan khoi phuc khong hop le hoac da het han'})
     
 def follow_service(*,user : Account,company_id:int):
-    if user.role != "SEEKER":
+    if user.role != Account.ROLE_CHOICES.SEEKER:
         raise ValidationError({'detail':'Chi co nguoi tim viec moi duoc theo doi cong ty'})
     company = Company.objects.get(pk = company_id)
     job_seeker = user.jobseeker

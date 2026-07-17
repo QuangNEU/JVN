@@ -23,11 +23,11 @@ class AccountManager(BaseUserManager):
         return user
     
 class Account(AbstractUser):
-    ROLE_CHOICES = (
-        ("ADMIN","Quan tri vien"),
-        ("SEEKER","Nguoi tim viec"),
-        ("COMPANY","Nha tuyen dung"),
-    )
+    class ROLE_CHOICES(models.TextChoices):
+        ADMIN = "ADMIN","Quan tri vien",
+        SEEKER = "SEEKER","Nguoi tim viec",
+        COMPANY = "COMPANY","Nha tuyen dung",
+    
     username = None
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20,choices=ROLE_CHOICES)
