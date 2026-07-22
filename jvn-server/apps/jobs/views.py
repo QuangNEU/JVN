@@ -82,7 +82,7 @@ class JobPostDetailView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def patch(self, request, post_id):
-        serializer = JobPostCreateSerializer(data = request.data, partial = True)
+        serializer = JobPostCreateSerializer(data = request.data, partial = True    )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         job_post = update_post_service(user=request.user, post_id=post_id, data=data)
