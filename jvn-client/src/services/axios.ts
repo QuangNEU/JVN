@@ -1,11 +1,61 @@
 import axios from "axios"
 
-const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8000/api',
+const axiosClient = axios.create({
+    baseURL: '/api',
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json'
     },
     timeout: 10000,
 });
 
-export default axiosInstance
+let isRefreshing = false;
+let failedQueue: { resolve: (value?: unknown) => void; reject: (reason?: any) => void }[] = [];
+
+const processQueue = (error: any) => {
+    failedQueue.forEach((prom) => {
+        if (error) prom.reject(error);
+        else prom.resolve();
+    });
+    failedQueue = [];
+};
+
+
+axiosClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        const excludedUrls = ['/auth/login', '/auth/refresh', '/auth/register'];
+        const isExcluded = excludedUrls.some((url) => originalRequest.url?.includes(url));
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isExcluded) {
+            if (isRefreshing) {
+                // đang refresh rồi, xếp hàng đợi thay vì gọi refresh nhiều lần cùng lúc
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then(() => axiosClient(originalRequest));
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+                await axiosClient.post('/auth/refresh');   // Route Handler sẽ viết sau
+                processQueue(null);
+                return axiosClient(originalRequest);   // gọi lại request cũ
+            } catch (refreshError) {
+                processQueue(refreshError);
+                if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+                    window.location.href = '/login';
+                }
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export default axiosClient
