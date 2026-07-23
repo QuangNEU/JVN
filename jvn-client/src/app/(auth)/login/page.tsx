@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { login } from '@/features/accounts/services/accountService';
+import { getRedirectByRole } from '@/utils/getRedirectPathByRole';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function LoginPage() {
         try {
             const data = await login({ email, password });
             setAuth(data.user);
-            router.push('/jobs');
+            router.push(getRedirectByRole(data.user.role));
         } catch (err: any) {
             setError(err.response?.data?.error || 'Email hoặc mật khẩu không chính xác');
         } finally {

@@ -45,7 +45,13 @@ axiosClient.interceptors.response.use(
                 return axiosClient(originalRequest);   // gọi lại request cũ
             } catch (refreshError) {
                 processQueue(refreshError);
-                if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+                const currentPath = window.location.pathname;
+
+                const publicPaths = ['/login', '/register', '/jobs'];
+
+                const isPublic = publicPaths.some(path => currentPath.startsWith(path));
+
+                if (!isPublic) {
                     window.location.href = '/login';
                 }
                 return Promise.reject(refreshError);

@@ -96,11 +96,23 @@ export default function TopNavBar() {
                                 <div className="absolute right-0 top-full w-52 rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
                                     {user.role === Role.SEEKER ? (
                                         <>
-                                            <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                                                <User className="h-4 w-4" /> Hồ sơ của tôi
+                                            <Link
+                                                href="/register/seeker"
+                                                className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+                                            >
+                                                Đăng ký
                                             </Link>
-                                            <Link href="/cvs" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                                                <FileText className="h-4 w-4" /> CV của tôi
+                                            <Link
+                                                href="/login"
+                                                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                                            >
+                                                Đăng nhập
+                                            </Link>
+                                            <Link
+                                                href="/register/company"
+                                                className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200"
+                                            >
+                                                Đăng tuyển &amp; tìm hồ sơ
                                             </Link>
                                         </>
                                     ) : (

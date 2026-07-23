@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         return response
     } catch (err: any) {
         const status = err.response?.status || 500
-        const message = err.response?.data?.detail || 'Login failed'
+        const message = err.response?.data?.error || 'Login failed'
         return NextResponse.json({ error: message }, { status })
     }
 }

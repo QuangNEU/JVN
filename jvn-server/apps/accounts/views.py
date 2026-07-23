@@ -33,6 +33,7 @@ class RegisterView(APIView):
             'access': str(refresh.access_token),
             'role': account.role,
             'email': account.email,
+            'name': account.name,
         },status=status.HTTP_201_CREATED)
     
 class LoginView(APIView):

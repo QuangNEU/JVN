@@ -36,3 +36,13 @@ export interface LoginPayLoad {
 export interface LoginResponse {
     user: Account;
 }
+
+export interface RegisterPayLoad {
+    email: string;
+    password: string;
+    role: Extract<Role, 'SEEKER' | 'COMPANY'>
+    name: string;
+    province?: string;
+    ward?: string;
+    tel?: string;
+}

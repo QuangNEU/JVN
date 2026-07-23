@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LoginPayLoad, LoginResponse } from "@/features/accounts/types/account";
+import { LoginPayLoad, LoginResponse, RegisterPayLoad } from "@/features/accounts/types/account";
 import axiosClient from "@/services/axios";
 
 export async function login(payload: LoginPayLoad): Promise<LoginResponse> {
@@ -12,4 +12,12 @@ export async function login(payload: LoginPayLoad): Promise<LoginResponse> {
 
 export async function logout(): Promise<void> {
     await axiosClient.post("/auth/logout")
+}
+
+export async function register(payload: RegisterPayLoad) {
+    const response = await axiosClient.post(
+        "/auth/register",
+        payload
+    )
+    return response.data
 }
