@@ -10,7 +10,7 @@ export default function AuthIniitalizer({ children }: { children: React.ReactNod
     const pathname = usePathname();
 
     useEffect(() => {
-        const publicRoutes = ['/login', '/register', '/forgot-password', '/auth/refresh'];
+        const publicRoutes = ['/login', '/register', '/forgot-password', '/auth/refresh', "/", "/reset-password"];
         if (!publicRoutes.includes(pathname)) {
             restoreSession();
         }

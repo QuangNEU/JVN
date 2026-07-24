@@ -33,6 +33,11 @@ export interface LoginPayLoad {
     password: string;
 }
 
+export interface GoogleLoginPayLoad {
+    google_token: string;
+    role?: string;
+}
+
 export interface LoginResponse {
     user: Account;
 }

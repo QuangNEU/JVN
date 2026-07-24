@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { error } from "console";
-
+import { AUTH_KEYS } from "@/constants/auth";
 export async function POST(request: NextRequest) {
     const body = await request.json()
 
@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
             path: '/',
             maxAge: 60 * 60 * 7
         })
-
+        response.cookies.set(AUTH_KEYS.USER_ROLE, user.role, {
+            httpOnly: false,   // middleware + client đều cần đọc, role không nhạy cảm
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 7,
+        });
         return response;
     }
     catch (err: any) {

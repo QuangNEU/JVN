@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import axios from "axios";
+import { AUTH_KEYS } from "@/constants/auth";
 
 export async function POST() {
     const cookiesStore = await cookies();
@@ -21,5 +22,6 @@ export async function POST() {
     const response = NextResponse.json({ message: 'Logged out' });
     response.cookies.delete("refreshToken");
     response.cookies.delete("accessToken")
+    response.cookies.delete(AUTH_KEYS.USER_ROLE);
     return response
 }
