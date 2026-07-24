@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer
 from rest_framework import status
+from core.pagnigation import StandardResultsPagination
 from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service
 from .selectors import get_pending_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector
 # Create your views here.
@@ -66,9 +67,21 @@ class CompanyJobPostView(APIView):
 class PublicJobPostView(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
-        job_posts = public_read_post_service()
-        serializer = JobPostSerializer(job_posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        filters = {
+            'keyword': request.query_params.get('keyword'),
+            'location': request.query_params.get('location'),
+            'salary_min': request.query_params.get('salary_min'),
+            'salary_max': request.query_params.get('salary_max'),
+            'level': request.query_params.get('level'),
+            'type': request.query_params.get('type'),
+            'category_id': request.query_params.get('category_id'),
+        }
+        job_posts = public_read_post_service(filters=filters)
+
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(job_posts, request)
+        serializer = JobPostSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 class JobPostDetailView(APIView):
     def get_permissions(self):

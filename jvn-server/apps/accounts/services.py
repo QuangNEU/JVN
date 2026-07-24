@@ -117,7 +117,8 @@ def google_login_service(*, google_token:str,role:str):
     if not user:
         if not role:
             raise ValidationError('Tai khoan chua ton tai vui long cap role')
-        
+        if role not in ('SEEKER', 'COMPANY'):
+            raise ValidationError('Role khong hop le')
         default_province = ""
         default_ward = ""
         if role == Account.ROLE_CHOICES.COMPANY:
@@ -135,7 +136,7 @@ def google_login_service(*, google_token:str,role:str):
         )
 
         user.set_unusable_password()
-        user.save(update_my_detail_service(['password']))
+        user.save(update_fields=['password'])
     else:
         if not user.is_active:
             raise ValidationError('Tai khoan nay da bi khoa')
