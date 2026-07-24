@@ -1,4 +1,4 @@
-import { GoogleLoginPayLoad, LoginPayLoad, LoginResponse, RegisterPayLoad } from "@/features/accounts/types/account";
+import { ForgotPasswordPayLoad, GoogleLoginPayLoad, LoginPayLoad, LoginResponse, RegisterPayLoad, ResetPasswordPayLoad } from "@/features/accounts/types/account";
 import axiosClient from "@/services/axios";
 
 export async function login(payload: LoginPayLoad): Promise<LoginResponse> {
@@ -27,4 +27,20 @@ export async function register(payload: RegisterPayLoad): Promise<LoginResponse>
         payload
     )
     return response.data
+}
+
+export async function forgotpassword(payload: ForgotPasswordPayLoad) {
+    const response = await axiosClient.post(
+        "/auth/forgot-password",
+        payload
+    )
+    return response
+}
+
+export async function resetPassword(payload: ResetPasswordPayLoad) {
+    const response = await axiosClient.post(
+        "/auth/reset-password",
+        payload
+    )
+    return response
 }

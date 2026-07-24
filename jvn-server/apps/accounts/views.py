@@ -102,7 +102,7 @@ class ResetPasswordView(APIView):
         serializer = ResetPasswordSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        reset_password_service(data)
+        reset_password_service(data = data)
         return Response({'message':'Da thay doi mat khau thanh cong'},status=status.HTTP_200_OK)
 
 class MyDetailView(APIView):

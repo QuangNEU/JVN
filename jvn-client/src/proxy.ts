@@ -3,6 +3,7 @@ import { AUTH_KEYS } from '@/constants/auth';
 
 const protectedRoutes = ['/cvs', '/profile', '/jobs/apply'];
 const employerProtectedRoutes = ['/jobs/manage', '/applicants', '/dashboard'];
+const SHARED_ROUTES = ['/forgot-password', '/reset-password'];
 
 export function proxy(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
@@ -13,6 +14,11 @@ export function proxy(request: NextRequest) {
     const userRole = request.cookies.get(AUTH_KEYS.USER_ROLE)?.value;
 
     const isEmployerDomain = hostname.startsWith('tuyendung.');
+
+    if (SHARED_ROUTES.some((r) => pathname.startsWith(r))) {
+        url.pathname = `/seeker-app${pathname}`;
+        return NextResponse.rewrite(url);
+    }
 
     // --- Bước 1: Rewrite theo domain, đưa vào đúng "không gian" route ---
     if (isEmployerDomain) {

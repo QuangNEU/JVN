@@ -51,3 +51,14 @@ export interface RegisterPayLoad {
     ward?: string;
     tel?: string;
 }
+
+export interface ForgotPasswordPayLoad {
+    email: string
+}
+
+export interface ResetPasswordPayLoad {
+    uid: string;
+    token: string;
+    new_password: string;
+    confirm_new_password: string;
+}

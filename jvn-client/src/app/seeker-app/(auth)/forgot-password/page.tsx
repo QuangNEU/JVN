@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import axiosClient from '@/services/axios';
+import { forgotpassword } from '@/features/accounts/services/accountService';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
         try {
             // Gọi API backend của em ở đây
-            await axiosClient.post('/accounts/forgot-password/', { email });
+            await forgotpassword({ email })
             setIsSuccess(true);
         } catch (error) {
             alert('Có lỗi xảy ra hoặc email không tồn tại.');

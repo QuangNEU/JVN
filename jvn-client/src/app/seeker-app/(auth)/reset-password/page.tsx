@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axiosClient from '@/services/axios';
+import { resetPassword } from '@/features/accounts/services/accountService';
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -23,15 +24,14 @@ export default function ResetPasswordPage() {
             alert('Mật khẩu xác nhận không khớp!');
             return;
         }
-
+        if (!uid || !token) {
+            alert('Missing uid or token, you dont have permission to change password')
+            return
+        }
         setIsLoading(true);
         try {
             // Gửi dữ liệu lên API Reset Password của Django
-            await axiosClient.post('/accounts/reset-password/', {
-                uid: uid,
-                token: token,
-                new_password: newPassword
-            });
+            await resetPassword({ new_password: newPassword, confirm_new_password: confirmPassword, uid: uid, token: token })
 
             alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
             router.push('/login');
