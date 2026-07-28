@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMyJobPosts, deleteJobPost, JobPostListParams } from '../services/jobs';
+import { getMyJobPosts, deleteJobPost } from '../services/jobs';
+import { JobPostListParams } from '../types/jobs';
 
 export function useCompanyJobs(params: JobPostListParams) {
     return useQuery({

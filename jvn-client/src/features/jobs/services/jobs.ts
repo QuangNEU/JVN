@@ -4,14 +4,11 @@ import {
     JobPost,
     JobPostFormData,
     PaginatedResponse,
+    JobPostListParams
 } from "../types/jobs";
 
-export interface JobPostListParams {
-    page?: number;
-    page_size?: number;
-}
 
-export async function createJobPost(payload: JobPostFormData): Promise<CreateJobPostResponse> {
+export async function createJobPost(payload: JobPostFormData): Promise<JobPost> {
     const response = await axiosClient.post('/jobs/company', payload);
     return response.data
 }

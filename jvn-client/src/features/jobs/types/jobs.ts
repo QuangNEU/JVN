@@ -93,3 +93,10 @@ export interface PaginatedResponse<T> {
     previous: string | null,
     results: T[]
 }
+
+
+export interface JobPostListParams {
+    page?: number;
+    page_size?: number;
+    status?: string;
+}
