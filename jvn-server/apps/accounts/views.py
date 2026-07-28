@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer
-from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password
+from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout
 from .selectors import get_profile_detail_selector
 
 # Create your views here.
@@ -73,7 +73,7 @@ class LogoutView(APIView):
     def post(self,request):
         serializer = LogoutSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
-        change_password(data = serializer.validated_data)
+        logout(data = serializer.validated_data)
         return Response({
             'messages':'Dang xuat thanh cong'
         },status= status.HTTP_200_OK)
@@ -112,9 +112,9 @@ class MyDetailView(APIView):
         serializer = AccountDetailSerializer(account)
         return Response(serializer.data,status=status.HTTP_200_OK)
     def patch(self,request):
-        serializers = UpdateDetailSerializer(data= request.data,partial=True)
-        serializers.is_valid(raise_exception=True)
-        data = serializers.validated_data
+        serializer = UpdateDetailSerializer(data= request.data,partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         account = request.user
         update_my_detail_service(account=account,data=data)
         updated_account = get_profile_detail_selector(account_id=request.user.id)

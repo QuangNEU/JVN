@@ -4,6 +4,8 @@ export const Role = {
     ADMIN: 'ADMIN',
 } as const;
 
+
+
 export type Role = typeof Role[keyof typeof Role];
 
 export interface JobSeekerProfile {
@@ -11,12 +13,18 @@ export interface JobSeekerProfile {
 }
 
 export interface CompanyProfile {
+    name: string;
     description: string | null;
-    headcount: number | null;
+    headcount: string | null;
     province: string;
     ward: string;
     exact_address: string | null;
     logo: string | null;
+    website: string | null;
+    founded_date: string | null;
+    tax_code: string | null;
+    industry: string | null;
+    followers_count: number;
 }
 
 export interface Account {

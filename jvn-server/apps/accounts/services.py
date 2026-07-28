@@ -14,7 +14,8 @@ import os
 import uuid
 
 ALLOWED_SEEKER_FIELDS = ['github_urls']
-ALLOWED_COMPANY_FIELDS = ['province', 'ward', 'exact_address', 'description', 'headcount']
+ALLOWED_COMPANY_FIELDS = ['name', 'description', 'headcount', 'province', 'ward', 'exact_address',
+            'logo', 'website', 'founded_date', 'tax_code', 'industry', 'followers_count',]
 
 
 def create_user_service(*,email,password,role,name,tel = None,province = None,ward = None):
@@ -181,7 +182,7 @@ def reset_password_service(*, data:dict):
 def follow_service(*,user : Account,company_id:int):
     if user.role != Account.ROLE_CHOICES.SEEKER:
         raise ValidationError({'detail':'Chi co nguoi tim viec moi duoc theo doi cong ty'})
-    company = Company.objects.get(pk = company_id)
+    company = get_object_or_404(Company, pk=company_id)
     job_seeker = user.jobseeker
 
     follow_record = Follow.objects.filter(company = company,job_seeker=job_seeker).first()

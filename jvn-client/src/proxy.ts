@@ -20,14 +20,12 @@ export function proxy(request: NextRequest) {
         return NextResponse.rewrite(url);
     }
 
-    // --- Bước 1: Rewrite theo domain, đưa vào đúng "không gian" route ---
     if (isEmployerDomain) {
         url.pathname = `/employer-app${pathname}`;
     } else {
         url.pathname = `/seeker-app${pathname}`;
     }
 
-    // --- Bước 2: Check auth cho route cần bảo vệ (dựa theo path GỐC, chưa rewrite) ---
     if (isEmployerDomain) {
         const needsAuth = employerProtectedRoutes.some((r) => pathname.startsWith(r));
         if (needsAuth && !accessToken) {

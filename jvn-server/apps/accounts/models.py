@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser,BaseUserManager
+from core.constants import HEADCOUNT_CHOICES
 # Create your models here.
 
 class AccountManager(BaseUserManager):
@@ -31,7 +32,7 @@ class Account(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20,choices=ROLE_CHOICES)
-    tel = models.CharField(max_length = 10,null=True, blank=True)
+    tel = models.CharField(max_length = 15,null=True, blank=True)
     name = models.CharField(max_length= 255)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -48,14 +49,18 @@ class JobSeeker(models.Model):
         return self.account.name
     
 class Company(models.Model):
-    account = models.OneToOneField(Account,on_delete=models.CASCADE,primary_key=True)
-    description = models.CharField(max_length=1000,blank=True,null=True)
-    headcount = models.IntegerField(blank=True, null=True)
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, primary_key=True)
+    description = models.TextField(blank=True, null=True)
+    headcount = models.CharField(max_length=20, choices=HEADCOUNT_CHOICES, blank=True, null=True)
     province = models.CharField(max_length=100)
     ward = models.CharField(max_length=100)
-    exact_address = models.CharField(max_length=255, blank=True, null=True) 
-    logo = models.FileField(upload_to='logos/', blank=True, null=True)
-    
+    exact_address = models.CharField(max_length=255, blank=True, null=True)
+    logo = models.ImageField(upload_to='logos/', blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
+    founded_date = models.DateField(null=True, blank=True)
+    tax_code = models.CharField(max_length=20, blank=True, null=True)
+    industry = models.CharField(max_length=100, blank=True, null=True)
+
     def __str__(self):
         return self.account.name
 

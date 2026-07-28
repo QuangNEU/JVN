@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from resumes.models import Tag
 from rest_framework.serializers import ValidationError
+from django.utils import timezone
 @transaction.atomic
 def create_category_service(*, user:Account, data:dict):
     have_role(user=user,role ='company')
@@ -48,7 +49,12 @@ def create_post_service(*,user :Account,data:dict):
     tag_ids = data.pop('tag_ids',[])
     category_ids = data.pop('category_ids',[])
 
-    job_post = JobPost.objects.create(company=company,**data)
+    job_post = JobPost.objects.create(
+        company=company,
+        status=JobPost.STATUS.PUBLISH,
+        date_posted=timezone.now(),
+        **data
+    )
     if tag_ids:
         tags = Tag.objects.filter(id__in = tag_ids)
         if tags.count() != len(set(tag_ids)):

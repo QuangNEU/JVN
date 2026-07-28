@@ -77,7 +77,9 @@ export default function TopNavBar() {
                 {/* Auth area */}
                 <div className="flex items-center gap-3">
                     {isLoading ? (
-                        <div className="h-9 w-24 animate-pulse rounded-full bg-gray-100" />
+                        <div className="flex items-center gap-3">
+                            <div className="h-9 w-28 animate-pulse rounded-full bg-gray-200" />
+                        </div>
                     ) : isAuthenticated && user ? (
                         <div
                             className="relative"
@@ -93,40 +95,47 @@ export default function TopNavBar() {
                             </button>
 
                             {userMenuOpen && (
-                                <div className="absolute right-0 top-full w-52 rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
-                                    {user.role === Role.SEEKER ? (
-                                        <>
+                                <div className="absolute right-0 top-full pt-2">
+                                    <div className=" w-56 rounded-lg border border-gray-100 bg-white py-2 shadow-lg flex flex-col">
+                                        {user.role === Role.SEEKER ? (
+                                            <>
+                                                <Link
+                                                    href="/profile"
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                                                >
+                                                    <User className="h-4 w-4" /> Hồ sơ cá nhân
+                                                </Link>
+                                                <Link
+                                                    href="/jobs/saved"
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                                                >
+                                                    <Briefcase className="h-4 w-4" /> Việc làm đã lưu
+                                                </Link>
+                                                <Link
+                                                    href="/cvs"
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                                                >
+                                                    <FileText className="h-4 w-4" /> Quản lý CV
+                                                </Link>
+                                            </>
+                                        ) : (
                                             <Link
-                                                href="/register/seeker"
-                                                className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+                                                href="/company/jobs"
+                                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
                                             >
-                                                Đăng ký
+                                                <Briefcase className="h-4 w-4" /> Quản lý tin tuyển dụng
                                             </Link>
-                                            <Link
-                                                href="/login"
-                                                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-                                            >
-                                                Đăng nhập
-                                            </Link>
-                                            <Link
-                                                href="/register/company"
-                                                className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200"
-                                            >
-                                                Đăng tuyển &amp; tìm hồ sơ
-                                            </Link>
-                                        </>
-                                    ) : (
-                                        <Link href="/company/jobs" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                                            <Briefcase className="h-4 w-4" /> Quản lý tin tuyển dụng
-                                        </Link>
-                                    )}
-                                    <hr className="my-1 border-gray-100" />
-                                    <button
-                                        onClick={handleLogout}
-                                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50"
-                                    >
-                                        <LogOut className="h-4 w-4" /> Đăng xuất
-                                    </button>
+                                        )}
+
+                                        <hr className="my-1 mx-2 border-gray-100" />
+
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-500 transition-colors hover:bg-red-50"
+                                        >
+                                            <LogOut className="h-4 w-4" /> Đăng xuất
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>

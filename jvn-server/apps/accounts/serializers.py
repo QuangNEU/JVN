@@ -3,6 +3,7 @@ from django.contrib.auth.password_validation import validate_password as django_
 from django.core.exceptions import ValidationError
 from core.validator import validate_strong_password,validate_tel
 from .models import Account, JobSeeker, Company, Follow
+from core.constants import HEADCOUNT_CHOICES
 
 PUBLIC_ROLE_CHOICES = (
         ("SEEKER", "Nguoi tim viec"),
@@ -82,10 +83,19 @@ class SeekerDetailSerializer(serializers.ModelSerializer):
         fields = ['github_urls']
 
 class CompanyDetailSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='account.name', read_only=True)
+    followers_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Company
-        fields = ['province','ward','exact_address','description','headcount']
+        fields = [
+            'name', 'description', 'headcount', 'province', 'ward', 'exact_address',
+            'logo', 'website', 'founded_date', 'tax_code', 'industry', 'followers_count',
+        ]
 
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    
 class AccountDetailSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
     class Meta:
@@ -100,15 +110,23 @@ class AccountDetailSerializer(serializers.ModelSerializer):
         else:
             return None
 
+from core.constants import HEADCOUNT_CHOICES   # tự tạo, hoặc định nghĩa ngay trong file này
+
 class UpdateDetailSerializer(serializers.Serializer):
-    tel = serializers.CharField(max_length =15,required = False, allow_blank = True,validators = [validate_tel])
-    name = serializers.CharField(max_length = 255, required = False)
-    #Cho Seeker
-    github_urls = serializers.CharField(max_length = 100,required = False, allow_blank=True)
-    #Cho Company
-    province = serializers.CharField(max_length = 100,required = False, allow_blank = True)
-    ward = serializers.CharField(max_length = 255,required = False,allow_blank = True)
-    exact_address = serializers.CharField(required=False)
-    description = serializers.CharField(required=False)
-    headcount = serializers.IntegerField(required=False)
-   
+    tel = serializers.CharField(max_length=15, required=False, allow_blank=True, validators=[validate_tel])
+    name = serializers.CharField(max_length=255, required=False)
+    
+    # Cho Seeker
+    github_urls = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    
+    # Cho Company
+    logo = serializers.ImageField(required=False, allow_null=True)
+    province = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    ward = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    exact_address = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(required=False, allow_blank=True)
+    headcount = serializers.ChoiceField(choices=HEADCOUNT_CHOICES, required=False)   
+    website = serializers.URLField(required=False, allow_blank=True)
+    founded_date = serializers.DateField(required=False, allow_null=True)
+    tax_code = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    industry = serializers.CharField(max_length=100, required=False, allow_blank=True)

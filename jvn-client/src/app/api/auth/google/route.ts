@@ -23,7 +23,13 @@ export async function POST(request: NextRequest) {
             path: "/",
             maxAge: 60 * 60 * 24 * 7
         })
-
+        response.cookies.set(AUTH_KEYS.USER_ROLE, user.role, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+        })
         return response
     }
     catch (err: any) {

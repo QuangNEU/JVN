@@ -32,7 +32,7 @@ class CategoryGetApprovedView(APIView):
 class CategoryGetPendingView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        categories = get_pending_category_service()
+        categories = get_pending_category_service(user=request.user)
         serializer = CategorySerializer(categories,many =True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
@@ -60,9 +60,11 @@ class CompanyJobPostView(APIView):
             'id': job_post.id
         },status=status.HTTP_201_CREATED)
     def get(self,request):
-        my_post = company_read_post_service(user = request.user)
-        serializer = JobPostSerializer(my_post, many =True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        my_posts = company_read_post_service(user = request.user)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(my_posts, request)
+        serializer = JobPostSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
     
 class PublicJobPostView(APIView):
     permission_classes = [AllowAny]
@@ -99,7 +101,7 @@ class JobPostDetailView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         job_post = update_post_service(user=request.user, post_id=post_id, data=data)
-        return Response(JobPostCreateSerializer(job_post).data,status=status.HTTP_200_OK)
+        return Response(JobPostSerializer(job_post).data,status=status.HTTP_200_OK)
     
     def delete(self, request, post_id):
         job_post = delete_post_service(user=request.user, post_id= post_id)

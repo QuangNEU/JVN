@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone } from 'lucide-react';
-import logo from '../../../../public/logo.png'
 
 const navItems = [
     { label: 'Giới thiệu', href: '/about' },

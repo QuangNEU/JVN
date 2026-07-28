@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
-import React, { useEffect } from "react"
-import { usePathname } from "next/navigation"
-import { useAuthStore } from "@/store/useAuthStore"
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 
-
-export default function AuthIniitalizer({ children }: { children: React.ReactNode }) {
-    const restoreSession = useAuthStore((s) => s.restoreSession)
-    const pathname = usePathname();
+export default function AuthInitializer({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const restoreSession = useAuthStore((state) => state.restoreSession);
 
     useEffect(() => {
-        const publicRoutes = ['/login', '/register', '/forgot-password', '/auth/refresh', "/", "/reset-password"];
-        if (!publicRoutes.includes(pathname)) {
-            restoreSession();
-        }
-    }, [restoreSession, pathname])
-    return <>{children}</>
+        void restoreSession();
+    }, [restoreSession]);
+
+    return <>{children}</>;
 }

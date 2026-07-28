@@ -5,23 +5,32 @@ from accounts.models import Account
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
 from django.db.models import Q 
+from django.utils import timezone
+from rest_framework.exceptions import PermissionDenied
 
 def get_approved_category_service():
     categories = Category.objects.filter(status = Category.Status.APPROVED).select_related('parent')
     return categories 
 
-def get_pending_category_service():
+def get_pending_category_service(*,user:Account):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionDenied({'detail': 'Dont have permission'})
     categories = Category.objects.filter(status = Category.Status.PENDING).select_related('parent')
     return categories
 
 def company_read_post_service(*,user:Account):
     have_role(user=user,role='company')
-    job_post = JobPost.objects.filter(company = user.company).prefetch_related('tags', 'category').order_by('-date_posted')
+    job_post = JobPost.objects.filter(
+        company=user.company,
+        is_deleted=False,
+    ).prefetch_related('tags', 'category').order_by('-date_posted')
     return job_post
 
 def public_read_post_service(*, filters: dict = None):
     queryset = JobPost.objects.filter(
         status='PUBLISHED', is_deleted=False
+    ).filter(
+        Q(expiration_date__isnull=True) | Q(expiration_date__gt=timezone.now())
     ).select_related('company', 'company__account').prefetch_related('tags', 'category')
 
     filters = filters or {}
@@ -65,9 +74,16 @@ def public_read_post_service(*, filters: dict = None):
 
 def get_post_detail_selector(*, user:Account, post_id:int):
     job_post = get_object_or_404(JobPost.objects.prefetch_related('tags','category'), id = post_id, is_deleted=False)
-    if job_post.status == JobPost.STATUS.PUBLISH:
+    is_public = (
+        job_post.status == JobPost.STATUS.PUBLISH
+        and (
+            job_post.expiration_date is None
+            or job_post.expiration_date > timezone.now()
+        )
+    )
+    if is_public:
         return job_post
     elif get_owned_or_403(user=user,profile_attr='company',obj=job_post,owner_field='company'):
         return job_post
     
-    raise PermissionError({'message':'You dont have the permission the read this post'})
+    raise PermissionDenied({'message':'You dont have the permission the read this post'})

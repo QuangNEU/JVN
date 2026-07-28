@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 urlpatterns = [
-    path('category/',views.ApproveCategoryView.as_view(),name= 'category-list-approved'),
+    path('category/',views.CategoryGetApprovedView.as_view(),name= 'category-list-approved'),
     path('category/create/',views.CategoryCreateView.as_view(),name = 'category-create'),
     path('category/pending/',views.CategoryGetPendingView.as_view(),name = 'category-pending'),
     path('category/<int:category_id>/approve/',views.ApproveCategoryView.as_view(),name= 'category-approve'),

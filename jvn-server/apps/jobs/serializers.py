@@ -18,12 +18,28 @@ class CategorySerializer(serializers.ModelSerializer):
 class JobPostSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source='company.account.name',read_only = True)
     tags = TagSerializer(many=True,read_only = True)
-    categories = CategorySerializer(many = True,read_only = True)
+    category = CategorySerializer(many = True,read_only = True)
     class Meta:
         model=JobPost
-        fields =['id', 'title', 'company_name', 'level', 'type', 
-            'salary_min', 'salary_max', 'currency', 'is_negotiable'
-            , 'date_posted', 'category', 'tags']
+        fields =['id',
+    'title',
+    'descriptions',
+    'requirement',
+    'benefit',
+    'company_name',
+    'level',
+    'type',
+    'status',
+    'experience_requirement',
+    'headcount',
+    'salary_min',
+    'salary_max',
+    'currency',
+    'is_negotiable',
+    'date_posted',
+    'expiration_date',
+    'category',
+    'tags', ]
         
 class JobPostCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
