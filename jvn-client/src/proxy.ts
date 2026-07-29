@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_KEYS } from '@/constants/auth';
 
 const protectedRoutes = ['/cvs', '/profile', '/jobs/apply'];
-const employerProtectedRoutes = ['/jobs/manage', '/applicants', '/dashboard'];
+const employerProtectedRoutes = ['/jobs', '/applicants', '/dashboard'];
 const SHARED_ROUTES = ['/forgot-password', '/reset-password'];
 
 export function proxy(request: NextRequest) {

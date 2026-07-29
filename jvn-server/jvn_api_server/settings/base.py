@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'cloudinary',
     "accounts",
     "resumes",
-    'jobs'
+    'jobs',
+    'applications'
 ]
 
 MIDDLEWARE = [

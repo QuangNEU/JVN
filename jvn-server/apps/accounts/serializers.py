@@ -110,7 +110,6 @@ class AccountDetailSerializer(serializers.ModelSerializer):
         else:
             return None
 
-from core.constants import HEADCOUNT_CHOICES   # tự tạo, hoặc định nghĩa ngay trong file này
 
 class UpdateDetailSerializer(serializers.Serializer):
     tel = serializers.CharField(max_length=15, required=False, allow_blank=True, validators=[validate_tel])
