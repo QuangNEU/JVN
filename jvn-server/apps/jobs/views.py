@@ -57,7 +57,8 @@ class CompanyJobPostView(APIView):
         job_post = create_post_service(user=request.user,data = data)
         return Response(JobPostCreateSerializer(job_post).data,status=status.HTTP_201_CREATED)
     def get(self,request):
-        my_posts = company_read_post_service(user = request.user)
+        status_query = request.query_params.get('status', None)
+        my_posts = company_read_post_service(user = request.user, status_filter=status_query)
         paginator = StandardResultsPagination()
         page = paginator.paginate_queryset(my_posts, request)
         serializer = JobPostSerializer(page, many=True)

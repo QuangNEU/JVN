@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from .serializers import TagSerializer,CVCreateSerializer,CVSerializer,CVUpdateSerializer
-from .selectors import get_cv_list_service,get_cv_selector
+from .selectors import get_cv_list_service,get_cv_selector,get_tag
 from .services import create_cv_service,delete_cv_service,set_default_service,update_cv_service,public_cv_service
 # Create your views here.
 
@@ -66,3 +66,10 @@ class CVPublicView(APIView):
             "message": f"Đã {status_text} CV '{cv.title}'.",
             "is_public": cv.is_public
         },status=status.HTTP_200_OK)
+
+
+class TagListView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        tags = get_tag()
+        return Response(TagSerializer(tags, many = True).data, status= status.HTTP_200_OK)

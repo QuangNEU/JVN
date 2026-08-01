@@ -15,3 +15,7 @@ def get_cv_selector(*,user:Account,cv_id :int):
     if cv.job_seeker != user.jobseeker:
         raise PermissionDenied('Ban khong co quyen xem CV cua nguoi khac')
     return cv
+
+def get_tag():
+    tags = Tag.objects.all()
+    return tags

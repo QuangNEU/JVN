@@ -77,7 +77,7 @@ export interface JobPostFormData {
     salary_max?: number
     currency: string
     is_negotiable: boolean
-    expiration_date: string;
+    expiration_date?: string;
     tag_ids: number[]
     category_ids: number[]
 }

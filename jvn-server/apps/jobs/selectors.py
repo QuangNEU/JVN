@@ -18,12 +18,14 @@ def get_pending_category_service(*,user:Account):
     categories = Category.objects.filter(status = Category.Status.PENDING).select_related('parent')
     return categories
 
-def company_read_post_service(*,user:Account):
+def company_read_post_service(*,user:Account, status_filter = None):
     have_role(user=user,role='company')
     job_post = JobPost.objects.filter(
         company=user.company,
         is_deleted=False,
     ).prefetch_related('tags', 'category').order_by('-date_posted')
+    if (status_filter):
+        job_post = job_post.filter(status = status_filter)
     return job_post
 
 def public_read_post_service(*, filters: dict = None):

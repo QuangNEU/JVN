@@ -54,7 +54,7 @@ class JobPostCreateSerializer(serializers.Serializer):
     salary_max = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     currency = serializers.CharField(max_length=10, required=False)
     is_negotiable = serializers.BooleanField(required=False)
-    expiration_date = serializers.DateTimeField()
+    expiration_date = serializers.DateField(required = False, allow_null = True)
     tag_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
     category_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
     def validate(self, data):

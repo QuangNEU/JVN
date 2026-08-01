@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Category
+from .models import Category, JobPost
 
+admin.site.register(JobPost)
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     # 1. Các cột hiển thị ngoài danh sách

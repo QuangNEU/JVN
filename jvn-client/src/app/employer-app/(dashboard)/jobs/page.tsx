@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Plus, Pencil, Trash2, Eye, Search } from 'lucide-react';
 import { useCompanyJobs, useDeleteJobPost } from '@/features/jobs/hooks/useCompanyJobs';
 import { JobPostListParams, JobPost, JobStatusType } from '@/features/jobs/types/jobs';
-
+import JobPostFormModal from '@/components/ui/JobPostFormModal';
 const statusConfig: Record<string, { label: string; className: string }> = {
     PUBLISHED: { label: 'Đang tuyển', className: 'bg-emerald-50 text-emerald-700' },
     CLOSED: { label: 'Đã đóng', className: 'bg-slate-100 text-slate-500' },
@@ -51,7 +51,7 @@ const statusTabs: { label: string; value: JobStatusType | undefined }[] = [
 export default function CompanyJobsPage() {
     const [filters, setFilters] = useState<JobPostListParams>({ page: 1 });
     const [keywordInput, setKeywordInput] = useState('');
-
+    const [showModal, setShowModal] = useState(false)
     const { data, isLoading, isError } = useCompanyJobs(filters);
     const deleteMutation = useDeleteJobPost();
 
@@ -79,14 +79,14 @@ export default function CompanyJobsPage() {
                         {totalCount > 0 ? `${totalCount} tin đã đăng` : 'Quản lý toàn bộ tin đã đăng của công ty bạn'}
                     </p>
                 </div>
-                <Link
-                    href="/jobs/new"
+                <button
+                    onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-amber-600"
                 >
                     <Plus className="h-4 w-4" /> Đăng tin mới
-                </Link>
+                </button>
             </div>
-
+            <JobPostFormModal isOpen={showModal} onClose={() => setShowModal(false)} />
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex gap-2">
                     {statusTabs.map((tab) => (

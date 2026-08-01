@@ -13,7 +13,7 @@ export async function POST() {
     }
     try {
         const djangoRes = await axios.post(
-            `${process.env.API_URL}/accounts/login/refresh/`,
+            `${process.env.API_URL}/accounts/token/refresh/`,
             { refresh: refreshToken }
         )
 
