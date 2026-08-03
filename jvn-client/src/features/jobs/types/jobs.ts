@@ -62,6 +62,7 @@ export interface JobPost {
     company_name: string;
     category: Category[];
     tags: Tag[];
+    company_province: string | null;
 }
 
 export interface JobPostFormData {

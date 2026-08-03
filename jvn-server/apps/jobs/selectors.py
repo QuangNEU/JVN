@@ -32,7 +32,7 @@ def public_read_post_service(*, filters: dict = None):
     queryset = JobPost.objects.filter(
         status='PUBLISHED', is_deleted=False
     ).filter(
-        Q(expiration_date__isnull=True) | Q(expiration_date__gt=timezone.now())
+        Q(expiration_date__isnull=True) | Q(expiration_date__gt=timezone.localdate())
     ).select_related('company', 'company__account').prefetch_related('tags', 'category')
 
     filters = filters or {}
@@ -80,7 +80,7 @@ def get_post_detail_selector(*, user:Account, post_id:int):
         job_post.status == JobPost.STATUS.PUBLISH
         and (
             job_post.expiration_date is None
-            or job_post.expiration_date > timezone.now()
+            or job_post.expiration_date > timezone.localdate()
         )
     )
     if is_public:

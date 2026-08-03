@@ -16,9 +16,8 @@ export async function POST() {
             `${process.env.API_URL}/accounts/token/refresh/`,
             { refresh: refreshToken }
         )
-
         const response = NextResponse.json({ success: true });
-        response.cookies.set("accessToken", djangoRes.data.access, {
+        response.cookies.set(AUTH_KEYS.ACCESS_TOKEN, djangoRes.data.access, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',

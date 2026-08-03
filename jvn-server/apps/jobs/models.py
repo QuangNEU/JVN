@@ -42,7 +42,7 @@ class JobPost(models.Model):
     currency = models.CharField(max_length=10, default='VND')
     is_negotiable = models.BooleanField(default=False)
     date_posted = models.DateTimeField(null=True,blank=True)
-    expiration_date = models.DateTimeField(null=True,blank=True)
+    expiration_date = models.DateField(null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)

@@ -17,6 +17,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class JobPostSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source='company.account.name',read_only = True)
+    company_province = serializers.CharField(source='company.province', read_only=True)
     tags = TagSerializer(many=True,read_only = True)
     category = CategorySerializer(many = True,read_only = True)
     class Meta:
@@ -27,6 +28,7 @@ class JobPostSerializer(serializers.ModelSerializer):
     'requirement',
     'benefit',
     'company_name',
+    'company_province',
     'level',
     'type',
     'status',

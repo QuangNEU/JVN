@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
     try {
         const djangoRes = await axios.patch(`${process.env.API_URL}/jobs/jobposts/${id}/`, body, {
-            headers: { Authorization: `BEARER ${accessToken}` }
+            headers: { Authorization: `Bearer ${accessToken}` }
         })
         return NextResponse.json(djangoRes.data)
     } catch (err: any) {
