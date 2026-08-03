@@ -43,10 +43,10 @@ export interface Tag {
 }
 
 export interface JobPost {
-    id: number,
-    title: string,
-    descriptions: string,
-    requirement: string,
+    id: number;
+    title: string;
+    descriptions: string;
+    requirement: string;
     benefit: string | null;
     type: JobTypeType;
     status: JobStatusType;
@@ -60,9 +60,15 @@ export interface JobPost {
     date_posted: string | null;
     expiration_date: string | null;
     company_name: string;
+    company_province: string | null;
+    company_ward: string | null;
+    company_exact_address: string | null;
+    company_logo: string | null;
+    company_headcount: string | null;
+    company_industry: string | null;
+    // company_website: string | null;
     category: Category[];
     tags: Tag[];
-    company_province: string | null;
 }
 
 export interface JobPostFormData {
