@@ -47,7 +47,7 @@ export default function CategoryBrowseSection() {
                             {visibleCategories.map((cat) => (
                                 <Link
                                     key={cat.id}
-                                    href={`/jobs/search?category_id=${cat.id}`}
+                                    href={`/jobs?category_id=${cat.id}`}
                                     onMouseEnter={() => setHovered(cat)}
                                     className={`flex items-center gap-3 px-4 py-3.5 text-sm font-semibold transition-colors ${hovered?.id === cat.id ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-600'
                                         }`}
@@ -94,7 +94,7 @@ export default function CategoryBrowseSection() {
                         </span>
                         <p className="text-sm text-slate-500">Chưa có danh mục nghề nào được duyệt.</p>
                         <Link
-                            href="/jobs/search"
+                            href="/jobs"
                             className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:underline"
                         >
                             <Search className="h-3.5 w-3.5" /> Xem tất cả việc làm
@@ -115,7 +115,7 @@ export default function CategoryBrowseSection() {
                             {hovered.children.map((child) => (
                                 <Link
                                     key={child.id}
-                                    href={`/jobs/search?category_id=${child.id}`}
+                                    href={`/jobs?category_id=${child.id}`}
                                     className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
                                 >
                                     {child.title}
@@ -126,7 +126,7 @@ export default function CategoryBrowseSection() {
                         <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
                             <p className="text-sm text-slate-400">Chưa có danh mục con.</p>
                             <Link
-                                href={`/jobs/search?category_id=${hovered.id}`}
+                                href={`/jobs?category_id=${hovered.id}`}
                                 className="text-sm font-semibold text-blue-600 hover:underline"
                             >
                                 Xem việc làm "{hovered.title}"

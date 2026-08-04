@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, User, Briefcase, LogOut, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Role } from '@/features/accounts/types/account';
 
 const navItems = [
     {
@@ -13,8 +12,8 @@ const navItems = [
         href: '/jobs',
         dropdown: [
             { label: 'Tất cả việc làm', href: '/jobs' },
-            { label: 'Việc làm theo cấp độ', href: '/jobs?level=junior' },
-            { label: 'Việc làm theo danh mục', href: '/jobs?category=all' },
+            { label: 'Việc làm theo cấp độ', href: '/jobs?level=JUNIOR' },
+            { label: 'Việc làm theo danh mục', href: '/jobs' },
         ],
     },
     { label: 'Tạo CV', href: '/cvs' },
@@ -33,11 +32,11 @@ export default function TopNavBar() {
     };
 
     return (
-        <header className="sticky top-0 z-50 border-b border-gray-100 bg-white">
+        <header className="sticky top-0 z-10 border-b border-gray-100 bg-white">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-emerald-600">JVN</span>
+                    <span className="text-2xl font-bold text-blue-600">JVN</span>
                 </Link>
 
                 {/* Nav items */}
@@ -51,7 +50,7 @@ export default function TopNavBar() {
                         >
                             <Link
                                 href={item.href}
-                                className="flex items-center gap-1 px-4 py-2 text-[15px] font-medium text-gray-700 transition-colors hover:text-emerald-600"
+                                className="flex items-center gap-1 px-4 py-2 text-[15px] font-medium text-gray-700 transition-colors hover:text-blue-600"
                             >
                                 {item.label}
                                 {item.dropdown && <ChevronDown className="h-4 w-4" />}
@@ -63,7 +62,7 @@ export default function TopNavBar() {
                                         <Link
                                             key={sub.label}
                                             href={sub.href}
-                                            className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-emerald-600"
+                                            className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
                                         >
                                             {sub.label}
                                         </Link>
@@ -86,8 +85,8 @@ export default function TopNavBar() {
                             onMouseEnter={() => setUserMenuOpen(true)}
                             onMouseLeave={() => setUserMenuOpen(false)}
                         >
-                            <button className="flex items-center gap-2 rounded-full border border-gray-200 py-1.5 pl-1.5 pr-3 hover:border-emerald-300">
-                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                            <button className="flex items-center gap-2 rounded-full border border-gray-200 py-1.5 pl-1.5 pr-3 hover:border-blue-300">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
                                     {user.name?.charAt(0).toUpperCase()}
                                 </span>
                                 <span className="text-sm font-medium text-gray-700">{user.name}</span>
@@ -96,28 +95,25 @@ export default function TopNavBar() {
 
                             {userMenuOpen && (
                                 <div className="absolute right-0 top-full pt-2">
-                                    <div className=" w-56 rounded-lg border border-gray-100 bg-white py-2 shadow-lg flex flex-col">
-
-                                        <>
-                                            <Link
-                                                href="/profile"
-                                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <User className="h-4 w-4" /> Hồ sơ cá nhân
-                                            </Link>
-                                            <Link
-                                                href="/jobs/saved"
-                                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <Briefcase className="h-4 w-4" /> Việc làm đã lưu
-                                            </Link>
-                                            <Link
-                                                href="/cvs"
-                                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <FileText className="h-4 w-4" /> Quản lý CV
-                                            </Link>
-                                        </>
+                                    <div className="flex w-56 flex-col rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
+                                        <Link
+                                            href="/profile"
+                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                        >
+                                            <User className="h-4 w-4" /> Hồ sơ cá nhân
+                                        </Link>
+                                        <Link
+                                            href="/jobs/saved"
+                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                        >
+                                            <Briefcase className="h-4 w-4" /> Việc làm đã lưu
+                                        </Link>
+                                        <Link
+                                            href="/cvs"
+                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                        >
+                                            <FileText className="h-4 w-4" /> Quản lý CV
+                                        </Link>
 
                                         <hr className="my-1 mx-2 border-gray-100" />
 
@@ -135,13 +131,13 @@ export default function TopNavBar() {
                         <>
                             <Link
                                 href="/register"
-                                className="rounded-full border border-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50"
+                                className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50"
                             >
                                 Đăng ký
                             </Link>
                             <Link
                                 href="/login"
-                                className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
                             >
                                 Đăng nhập
                             </Link>

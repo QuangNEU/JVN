@@ -29,16 +29,11 @@ def delete_cv_service(*,user:Account,cv_id:int):
         raise PermissionDenied({'detail':'Chi ung vien moi co the xoa CV'})
     jobseeker = user.jobseeker
     cv = get_object_or_404(CV,id= cv_id)
-    file_public_id = cv.file.public_id if cv.file else None
     if cv.job_seeker != jobseeker:
         raise PermissionDenied({'detail':'Chi co chu so huu moi co the xoa'})
+    if cv.file:
+        cv.file.delete(save=False)
     cv.delete()
-    if  file_public_id:
-        try:
-            public_id = file_public_id
-            cloudinary.uploader.destroy(public_id)
-        except Exception as e:
-            raise ValidationError({'detail':f'Khong the xoa CV do {e}'})
     return True
 
 @transaction.atomic

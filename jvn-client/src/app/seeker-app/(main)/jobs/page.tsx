@@ -82,7 +82,7 @@ function JobSearchContent() {
     return (
         <div className="bg-slate-50">
             {/* Thanh tìm kiếm gọn, dính trên đầu */}
-            <div className="sticky top-0 z-20 bg-blue-700 px-4 py-4 sm:px-6">
+            <div className="sticky top-0 z-30 bg-blue-700 px-4 py-4 sm:px-6">
                 <form onSubmit={applySearch} className="mx-auto flex max-w-5xl flex-col gap-2 rounded-xl bg-white p-1.5 sm:flex-row">
                     <div className="flex flex-1 items-center gap-2 px-3">
                         <Search className="h-4 w-4 shrink-0 text-slate-400" />

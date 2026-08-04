@@ -24,12 +24,7 @@ class CVManageView(APIView):
         cvs = get_cv_list_service(user=request.user)
         result = CVSerializer(cvs,many =True)
         return Response(result.data,status=status.HTTP_200_OK)
-    def delete(self,request):
-        cv_id = request.query_params.get('id')
-        if not cv_id:
-            raise ValidationError({'detail':'Vui long chon CV muon xoa'})
-        delete_cv_service(user=request.user,cv_id=cv_id)
-        return Response({'message':'Xoa thanh cong'},status=status.HTTP_200_OK)
+    
     
 class CVDetailView(APIView):
     permission_classes=[IsAuthenticated]
@@ -37,7 +32,13 @@ class CVDetailView(APIView):
         cv = get_cv_selector(user=request.user,cv_id=cv_id)
         serialize = CVSerializer(cv)
         return Response(serialize.data,status=status.HTTP_200_OK)
-
+    def delete(self,request, cv_id):
+        # cv_id = request.query_params.get('id')
+        if not cv_id:
+            raise ValidationError({'detail':'Vui long chon CV muon xoa'})
+        delete_cv_service(user=request.user,cv_id=cv_id)
+        return Response({'message':'Xoa thanh cong'},status=status.HTTP_200_OK)
+    
 class CVSetDefaultView(APIView):
     permission_classes=[IsAuthenticated]
     def post(self, request, cv_id):

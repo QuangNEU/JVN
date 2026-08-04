@@ -6,7 +6,7 @@ from .models import CV,Tag
 def get_cv_list_service(*,user :Account):
     if not hasattr(user, 'jobseeker'):
         raise PermissionDenied({'detail':'Chi co nguoi duung moi duoc lay cv'})
-    return CV.objects.filter(jobseeker = user.jobseeker).only('title','file','created_at').order_by('-created_at')
+    return CV.objects.filter(job_seeker = user.jobseeker).only('title','file','created_at').order_by('-created_at')
 
 def get_cv_selector(*,user:Account,cv_id :int):
     if not hasattr(user,'jobseeker'):

@@ -8,7 +8,7 @@ import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 interface JobSearchBarProps {
     initialKeyword?: string;
     initialLocation?: string;
-    variant?: 'hero' | 'compact'; // hero = to, dùng ở trang chủ; compact = gọn, dùng ở trang search
+    variant?: 'hero' | 'compact';
 }
 
 export default function JobSearchBar({ initialKeyword = '', initialLocation = '', variant = 'hero' }: JobSearchBarProps) {
