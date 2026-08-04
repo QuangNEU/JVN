@@ -62,7 +62,7 @@ function JobSearchContent() {
         const params = new URLSearchParams();
         if (keywordInput) params.set('keyword', keywordInput);
         if (locationInput) params.set('location', locationInput);
-        router.push(`/jobs/search?${params.toString()}`);
+        router.push(`/jobs?${params.toString()}`);
     };
 
     const toggleSingleFilter = <K extends keyof PublicJobFilterPayload>(key: K, value: PublicJobFilterPayload[K]) => {

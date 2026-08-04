@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_KEYS } from '@/constants/auth';
 
-const protectedRoutes = ['/cvs', '/profile', '/jobs/apply'];
+const protectedRoutes = ['/cvs', '/profile', '/application'];
 const employerProtectedRoutes = ['/jobs', '/applicants', '/dashboard'];
 const SHARED_ROUTES = ['/forgot-password', '/reset-password'];
 

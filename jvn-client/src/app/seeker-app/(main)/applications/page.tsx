@@ -18,7 +18,7 @@ export default function MyApplicationsPage() {
 
     const handleTabChange = (tab: ApplicationStatus | 'ALL') => {
         setActiveTab(tab);
-        setPage(1); // reset trang khi đổi filter
+        setPage(1);
     };
 
     return (
@@ -34,8 +34,8 @@ export default function MyApplicationsPage() {
                             key={tab.value}
                             onClick={() => handleTabChange(tab.value)}
                             className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${activeTab === tab.value
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white text-slate-600 hover:bg-slate-100'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             {tab.label}

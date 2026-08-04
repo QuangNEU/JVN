@@ -1,4 +1,6 @@
 import axios from "axios"
+import { SEEKER_PROTECTED_ROUTES, EMPLOYER_PROTECTED_ROUTES } from "@/constants/protectedRoute";
+
 
 const axiosClient = axios.create({
     baseURL: '/api',
@@ -45,15 +47,16 @@ axiosClient.interceptors.response.use(
                 return axiosClient(originalRequest);   // gọi lại request cũ
             } catch (refreshError) {
                 processQueue(refreshError);
+
                 const currentPath = window.location.pathname;
+                const isEmployerDomain = window.location.hostname.startsWith('tuyendung.');
+                const protectedRoutes = isEmployerDomain ? EMPLOYER_PROTECTED_ROUTES : SEEKER_PROTECTED_ROUTES;
+                const isProtected = protectedRoutes.some((r) => currentPath.startsWith(r));
 
-                const publicPaths = ['/login', '/register', '/jobs'];
-
-                const isPublic = publicPaths.some(path => currentPath.startsWith(path));
-
-                if (!isPublic) {
+                if (isProtected) {
                     window.location.href = '/login';
                 }
+
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

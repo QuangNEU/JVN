@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     restoreSession: async () => {
         try {
-            const mesResponse = await axiosClient.get("/accounts/me/")
+            const mesResponse = await axiosClient.get("/accounts/me")
             set({
                 user: mesResponse.data,
                 isAuthenticated: true,

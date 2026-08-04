@@ -98,7 +98,7 @@ export default function PublicJobDetailPage() {
         return (
             <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
                 <p className="text-sm text-red-500">Không tìm thấy tin tuyển dụng này.</p>
-                <Link href="/jobs/search" className="text-sm font-semibold text-blue-600 hover:underline">Quay lại tìm việc</Link>
+                <Link href="/jobs" className="text-sm font-semibold text-blue-600 hover:underline">Quay lại tìm việc</Link>
             </div>
         );
     }
@@ -110,11 +110,11 @@ export default function PublicJobDetailPage() {
                 <div className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
                     <Link href="/" className="hover:text-blue-600">Trang chủ</Link>
                     <ChevronRight className="h-3.5 w-3.5" />
-                    <Link href="/jobs/search" className="hover:text-blue-600">Việc làm</Link>
+                    <Link href="/jobs" className="hover:text-blue-600">Việc làm</Link>
                     {job.category?.[0] && (
                         <>
                             <ChevronRight className="h-3.5 w-3.5" />
-                            <Link href={`/jobs/search?category_id=${job.category[0].id}`} className="hover:text-blue-600">
+                            <Link href={`/jobs?category_id=${job.category[0].id}`} className="hover:text-blue-600">
                                 {job.category[0].title}
                             </Link>
                         </>
@@ -395,7 +395,7 @@ export default function PublicJobDetailPage() {
                                     {job.category.map((cat) => (
                                         <Link
                                             key={cat.id}
-                                            href={`/jobs/search?category_id=${cat.id}`}
+                                            href={`/jobs?category_id=${cat.id}`}
                                             className="rounded-full border border-slate-200 px-3.5 py-2 text-sm text-slate-600 hover:border-blue-400 hover:text-blue-600"
                                         >
                                             {cat.title}

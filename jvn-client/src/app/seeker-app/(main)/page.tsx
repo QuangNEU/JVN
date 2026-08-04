@@ -23,7 +23,7 @@ export default function SeekerHomePage() {
         const params = new URLSearchParams();
         if (keyword) params.set('keyword', keyword);
         if (location) params.set('location', location);
-        router.push(`/jobs/search?${params.toString()}`);
+        router.push(`/jobs?${params.toString()}`);
     };
 
     return (

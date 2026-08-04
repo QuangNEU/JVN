@@ -41,8 +41,9 @@ def public_read_post_service(*, filters: dict = None):
     if keyword:
         queryset = queryset.filter(
             Q(title__icontains=keyword) |
-            Q(descriptions__icontains=keyword) |
-            Q(requirement__icontains=keyword)
+            # Q(descriptions__icontains=keyword) |
+            # Q(requirement__icontains=keyword) |
+            Q(company__account__name__icontains=keyword)
         )
 
     location = filters.get('location')

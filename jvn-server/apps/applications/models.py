@@ -59,6 +59,7 @@ class Application(models.Model):
         blank=True
     )
     cover_letter = models.TextField(blank=True, null=True)
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(
