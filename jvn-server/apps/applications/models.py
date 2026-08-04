@@ -58,7 +58,7 @@ class Application(models.Model):
     rejected_reason = models.TextField(
         blank=True
     )
-
+    cover_letter = models.TextField(blank=True, null=True)
     class Meta:
         constraints = [
             models.UniqueConstraint(

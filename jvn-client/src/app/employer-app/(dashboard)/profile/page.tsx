@@ -54,7 +54,7 @@ export default function CompanyProfilePage() {
 
         await updateMutation.mutateAsync(formData);
         setIsEditing(false);
-        setLogoFile(null); // Reset file sau khi lưu
+        setLogoFile(null);
     };
 
     // 4. Biến này dùng để hiển thị dữ liệu linh hoạt (lấy từ form khi sửa, lấy từ db khi xem)

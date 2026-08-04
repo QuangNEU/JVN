@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
 import {
     ArrowLeft, Link2, Heart, Send, MapPin, Star,
     Clock, Building2, Users, Briefcase, TrendingUp, ChevronRight, Info,
@@ -12,6 +13,8 @@ import { usePublicJobDetail, usePublicJobs } from '@/features/jobs/hooks/usePubl
 import { JobPost } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
 import { FacebookIcon, LinkedinIcon } from '@/components/icons/icons';
+import ApplyJobModal from '@/components/ui/ApplyJobModal';
+
 const typeLabels: Record<string, string> = {
     FULLTIME: 'Toàn thời gian', PARTTIME: 'Bán thời gian', HYBRID: 'Hỗn hợp', REMOTE: 'Từ xa',
 };
@@ -50,10 +53,20 @@ export default function PublicJobDetailPage() {
     const params = useParams();
     const id = Number(params.id);
     const { data: job, isLoading, isError } = usePublicJobDetail(id);
-    const [showApplySoon, setShowApplySoon] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [copied, setCopied] = useState(false);
     const [activeTab, setActiveTab] = useState<'detail' | 'related'>('detail');
+    const [showApplyModal, setShowApplyModal] = useState(false);
+    const router = useRouter();
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+    const handleApplyClick = () => {
+        if (!isAuthenticated) {
+            router.push(`/login?redirect=/jobs/${id}`);
+            return;
+        }
+        setShowApplyModal(true);
+    };
 
     const relatedCategoryId = job?.category?.[0]?.id;
     const { data: relatedData } = usePublicJobs({
@@ -110,7 +123,7 @@ export default function PublicJobDetailPage() {
                     <span className="truncate text-slate-700">{job.title}</span>
                 </div>
 
-                <Link href="/jobs/search" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 sm:hidden">
+                <Link href="/jobs" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 sm:hidden">
                     <ArrowLeft className="h-4 w-4" /> Quay lại
                 </Link>
 
@@ -173,7 +186,7 @@ export default function PublicJobDetailPage() {
 
                             <div className="mt-5 flex gap-3">
                                 <button
-                                    onClick={() => setShowApplySoon(true)}
+                                    onClick={handleApplyClick}
                                     className="flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
                                 >
                                     <Send className="h-4 w-4" /> Ứng tuyển ngay
@@ -237,7 +250,7 @@ export default function PublicJobDetailPage() {
                                 </button>
                             </div>
                             <button
-                                onClick={() => setShowApplySoon(true)}
+                                onClick={handleApplyClick}
                                 className="mr-2 hidden items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 sm:flex"
                             >
                                 <Send className="h-3.5 w-3.5" /> Ứng tuyển ngay
@@ -285,7 +298,7 @@ export default function PublicJobDetailPage() {
                                     </p>
 
                                     <button
-                                        onClick={() => setShowApplySoon(true)}
+                                        onClick={handleApplyClick}
                                         className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
                                     >
                                         <Send className="h-4 w-4" /> Ứng tuyển ngay
@@ -346,7 +359,7 @@ export default function PublicJobDetailPage() {
                             </div>
 
                             <Link
-                                href={`/jobs/search?keyword=${encodeURIComponent(job.company_name)}`}
+                                href={`/jobs?keyword=${encodeURIComponent(job.company_name)}`}
                                 className="mt-4 block rounded-full border border-blue-600 py-2.5 text-center text-sm font-semibold text-blue-600 hover:bg-blue-50"
                             >
                                 Xem các tin khác của công ty
@@ -396,7 +409,7 @@ export default function PublicJobDetailPage() {
                             <div className="rounded-2xl border border-slate-100 bg-white p-5">
                                 <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">Tìm việc theo khu vực</h3>
                                 <Link
-                                    href={`/jobs/search?location=${encodeURIComponent(job.company_province)}`}
+                                    href={`/jobs?location=${encodeURIComponent(job.company_province)}`}
                                     className="inline-block rounded-full border border-slate-200 px-3.5 py-2 text-sm text-slate-600 hover:border-blue-400 hover:text-blue-600"
                                 >
                                     {job.company_province}
@@ -422,18 +435,12 @@ export default function PublicJobDetailPage() {
                 </div>
             </div>
 
-            {showApplySoon && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center">
-                        <button onClick={() => setShowApplySoon(false)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
-                            <X className="h-5 w-5" />
-                        </button>
-                        <p className="mt-2 text-sm text-slate-600">
-                            Tính năng ứng tuyển đang được hoàn thiện, quay lại sau nhé!
-                        </p>
-                    </div>
-                </div>
-            )}
+            <ApplyJobModal
+                jobPostId={id}
+                jobTitle={job.title}
+                isOpen={showApplyModal}
+                onClose={() => setShowApplyModal(false)}
+            />
         </div>
     );
 }

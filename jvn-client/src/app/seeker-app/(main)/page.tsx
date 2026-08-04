@@ -55,7 +55,7 @@ export default function SeekerHomePage() {
             <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
                 <div className="mb-5 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-slate-800">Việc làm tốt nhất</h2>
-                    <Link href="/jobs/search" className="text-sm font-semibold text-blue-600 hover:underline">
+                    <Link href="/jobs" className="text-sm font-semibold text-blue-600 hover:underline">
                         Xem tất cả
                     </Link>
                 </div>

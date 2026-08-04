@@ -15,7 +15,7 @@ def apply_job_services(*,user:Account,job_post_id:int, data:dict):
     if(job_post.status != JobPost.STATUS.PUBLISH):
         raise PermissionDenied({'error': 'You dont have permission to access this post'})
     
-    if Application.objects.filter(job_seeker=job_seeker,job_post = job_post).exists():
+    if Application.objects.filter(applicant=job_seeker,job_post = job_post).exists():
         raise ValidationError({'error': 'You have applied this job.'})
     
     application = Application.objects.create(

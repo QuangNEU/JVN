@@ -103,7 +103,7 @@ export default function TopNavBar() {
                                             <User className="h-4 w-4" /> Hồ sơ cá nhân
                                         </Link>
                                         <Link
-                                            href="/jobs/saved"
+                                            href="/applications"
                                             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
                                         >
                                             <Briefcase className="h-4 w-4" /> Việc làm đã lưu
