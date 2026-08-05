@@ -1,0 +1,8 @@
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jvn_api_server.settings.dev')
+
+app = Celery('JVN')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()

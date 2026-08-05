@@ -195,7 +195,7 @@ def follow_service(*,user : Account,company_id:int):
         Follow.objects.create(
             job_seeker=job_seeker,
             company=company
-        ),
+        )
         is_following = True
         message = f'Theo doi thanh cong cong ty {company.account.name}'
     return {

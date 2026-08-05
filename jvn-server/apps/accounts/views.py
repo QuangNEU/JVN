@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer
 from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout
-from .selectors import get_profile_detail_selector
+from .selectors import get_profile_detail_selector, get_is_following
 
 # Create your views here.
 class RegisterView(APIView):
@@ -128,3 +128,12 @@ class FollowView(APIView):
             company_id=company_id
         )
         return Response(result,status=status.HTTP_200_OK)
+
+class CheckFollowingView(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self, request, company_id):
+        is_following = get_is_following(
+            user= request.user,
+            company_id= company_id
+        )
+        return Response({'is_following': is_following}, status= status.HTTP_200_OK)

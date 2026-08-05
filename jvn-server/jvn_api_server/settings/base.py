@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     "accounts",
     "resumes",
     'jobs',
-    'applications'
+    'applications',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -167,3 +168,7 @@ STORAGES = {
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/JVN/'
+
+CELERY_BROKER_URL = os.environ.get('REDIS_URL')
+# CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
+CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'

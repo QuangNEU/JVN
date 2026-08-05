@@ -129,3 +129,4 @@ class UpdateDetailSerializer(serializers.Serializer):
     founded_date = serializers.DateField(required=False, allow_null=True)
     tax_code = serializers.CharField(max_length=20, required=False, allow_blank=True)
     industry = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    

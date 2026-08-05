@@ -11,5 +11,6 @@ urlpatterns = [
     path('google-login/',views.GoogleLoginView.as_view()),
     path('password/forgot/',views.ForgotPasswordView.as_view()),
     path('password/reset/', views.ResetPasswordView.as_view(), name='reset-password'),
-    path('companies/<int:company_id>/follow/',views.FollowView.as_view,name='follow')
+    path('follow/<int:company_id>/',views.FollowView.as_view,name='follow'),
+    path('follow/<int:company_id>/status/', views.CheckFollowingView.as_view(), name='check-following'),
 ]
