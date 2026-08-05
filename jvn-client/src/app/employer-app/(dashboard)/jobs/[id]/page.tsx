@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Users2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -9,7 +10,10 @@ import {
     CheckCircle2, PauseCircle, Building2,
 } from 'lucide-react';
 import { useJobPostDetail, useDeleteJobPost, useUpdateJobPost } from '@/features/jobs/hooks/useCompanyJobs';
-
+import { useJobApplicants } from '@/features/applications/hooks/useJobApplicant';
+import ApplicantCard from '@/components/ui/ApplicantCard';
+import { STATUS_FILTER_TABS } from '@/constants/application';
+import { ApplicationStatus } from '@/features/applications/types/application';
 const typeLabels: Record<string, string> = {
     FULLTIME: 'Toàn thời gian',
     PARTTIME: 'Bán thời gian',
@@ -54,6 +58,13 @@ export default function JobPostDetailPage() {
     const deleteMutation = useDeleteJobPost();
     const updateMutation = useUpdateJobPost();
     const [actionError, setActionError] = useState('');
+    const [activeTab, setActiveTab] = useState<'detail' | 'applicants'>('detail');
+    const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'ALL'>('ALL');
+
+    const { data: applicantsData, isLoading: isLoadingApplicants, isError: isApplicantsError } = useJobApplicants(
+        id,
+        statusFilter === 'ALL' ? undefined : statusFilter
+    );
 
     const handleDelete = () => {
         if (!confirm('Bạn chắc chắn muốn xóa tin tuyển dụng này? Hành động này không thể hoàn tác.')) return;
@@ -192,99 +203,167 @@ export default function JobPostDetailPage() {
                     <p className="text-lg font-bold text-slate-800">{formatSalary(job)}</p>
                 </div>
             </div>
+            {/* Tabs: Chi tiết / Ứng viên */}
+            <div className="mt-6 flex gap-1 rounded-2xl border border-slate-100 bg-white p-1.5">
+                <button
+                    onClick={() => setActiveTab('detail')}
+                    className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors ${activeTab === 'detail' ? 'bg-amber-500 text-white' : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                >
+                    Chi tiết tin tuyển dụng
+                </button>
+                <button
+                    onClick={() => setActiveTab('applicants')}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${activeTab === 'applicants' ? 'bg-amber-500 text-white' : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                >
+                    <Users2 className="h-4 w-4" />
+                    Ứng viên
+                    {applicantsData && applicantsData.count > 0 && (
+                        <span
+                            className={`ml-1 rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'applicants' ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700'
+                                }`}
+                        >
+                            {applicantsData.count}
+                        </span>
+                    )}
+                </button>
+            </div>
 
             {/* Main content grid */}
-            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-6 lg:col-span-2">
-                    <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                        <h2 className="mb-3 text-base font-bold text-slate-800">Mô tả công việc</h2>
-                        <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.descriptions}</p>
-                    </section>
-
-                    <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                        <h2 className="mb-3 text-base font-bold text-slate-800">Yêu cầu ứng viên</h2>
-                        <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.requirement}</p>
-                    </section>
-
-                    {job.benefit && (
+            {activeTab === 'detail' && (
+                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="space-y-6 lg:col-span-2">
                         <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                            <h2 className="mb-3 text-base font-bold text-slate-800">Quyền lợi</h2>
-                            <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.benefit}</p>
+                            <h2 className="mb-3 text-base font-bold text-slate-800">Mô tả công việc</h2>
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.descriptions}</p>
                         </section>
-                    )}
-                </div>
 
-                <div className="space-y-6">
-                    <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                        <h2 className="mb-4 text-base font-bold text-slate-800">Thông tin chung</h2>
-                        <dl className="space-y-3.5 text-sm">
-                            <div className="flex items-center justify-between">
-                                <dt className="flex items-center gap-1.5 text-slate-500">
-                                    <Clock className="h-4 w-4" /> Kinh nghiệm
-                                </dt>
-                                <dd className="font-medium text-slate-700">{job.experience_requirement}</dd>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <dt className="flex items-center gap-1.5 text-slate-500">
-                                    <Calendar className="h-4 w-4" /> Hạn nộp hồ sơ
-                                </dt>
-                                <dd
-                                    className={`font-medium ${remaining !== null && remaining >= 0 && remaining <= 3
+                        <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
+                            <h2 className="mb-3 text-base font-bold text-slate-800">Yêu cầu ứng viên</h2>
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.requirement}</p>
+                        </section>
+
+                        {job.benefit && (
+                            <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
+                                <h2 className="mb-3 text-base font-bold text-slate-800">Quyền lợi</h2>
+                                <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{job.benefit}</p>
+                            </section>
+                        )}
+                    </div>
+
+                    <div className="space-y-6">
+                        <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
+                            <h2 className="mb-4 text-base font-bold text-slate-800">Thông tin chung</h2>
+                            <dl className="space-y-3.5 text-sm">
+                                <div className="flex items-center justify-between">
+                                    <dt className="flex items-center gap-1.5 text-slate-500">
+                                        <Clock className="h-4 w-4" /> Kinh nghiệm
+                                    </dt>
+                                    <dd className="font-medium text-slate-700">{job.experience_requirement}</dd>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <dt className="flex items-center gap-1.5 text-slate-500">
+                                        <Calendar className="h-4 w-4" /> Hạn nộp hồ sơ
+                                    </dt>
+                                    <dd
+                                        className={`font-medium ${remaining !== null && remaining >= 0 && remaining <= 3
                                             ? 'text-red-500'
                                             : 'text-slate-700'
-                                        }`}
-                                >
-                                    {formatDate(job.expiration_date)}
-                                </dd>
-                            </div>
-                            {remaining !== null && (
-                                <div className="flex items-center justify-between">
-                                    <dt className="text-slate-500">Còn lại</dt>
-                                    <dd className={`font-medium ${remaining < 0 ? 'text-slate-400' : remaining <= 3 ? 'text-red-500' : 'text-slate-700'}`}>
-                                        {remaining < 0 ? 'Đã hết hạn' : `${remaining} ngày`}
+                                            }`}
+                                    >
+                                        {formatDate(job.expiration_date)}
                                     </dd>
                                 </div>
-                            )}
-                        </dl>
-                    </section>
-
-                    {job.tags?.length > 0 && (
-                        <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                            <h2 className="mb-3 flex items-center gap-1.5 text-base font-bold text-slate-800">
-                                <TagIcon className="h-4 w-4" /> Kỹ năng yêu cầu
-                            </h2>
-                            <div className="flex flex-wrap gap-2">
-                                {job.tags.map((tag) => (
-                                    <span
-                                        key={tag.id}
-                                        className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700"
-                                    >
-                                        {tag.tag_name}
-                                    </span>
-                                ))}
-                            </div>
+                                {remaining !== null && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-slate-500">Còn lại</dt>
+                                        <dd className={`font-medium ${remaining < 0 ? 'text-slate-400' : remaining <= 3 ? 'text-red-500' : 'text-slate-700'}`}>
+                                            {remaining < 0 ? 'Đã hết hạn' : `${remaining} ngày`}
+                                        </dd>
+                                    </div>
+                                )}
+                            </dl>
                         </section>
-                    )}
 
-                    {job.category?.length > 0 && (
-                        <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
-                            <h2 className="mb-3 flex items-center gap-1.5 text-base font-bold text-slate-800">
-                                <MapPin className="h-4 w-4" /> Danh mục ngành nghề
-                            </h2>
-                            <div className="flex flex-wrap gap-2">
-                                {job.category.map((cat) => (
-                                    <span
-                                        key={cat.id}
-                                        className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600"
-                                    >
-                                        {cat.title}
-                                    </span>
-                                ))}
-                            </div>
-                        </section>
+                        {job.tags?.length > 0 && (
+                            <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
+                                <h2 className="mb-3 flex items-center gap-1.5 text-base font-bold text-slate-800">
+                                    <TagIcon className="h-4 w-4" /> Kỹ năng yêu cầu
+                                </h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.tags.map((tag) => (
+                                        <span
+                                            key={tag.id}
+                                            className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700"
+                                        >
+                                            {tag.tag_name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {job.category?.length > 0 && (
+                            <section className="rounded-2xl border border-slate-100 bg-white px-6 py-5">
+                                <h2 className="mb-3 flex items-center gap-1.5 text-base font-bold text-slate-800">
+                                    <MapPin className="h-4 w-4" /> Danh mục ngành nghề
+                                </h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.category.map((cat) => (
+                                        <span
+                                            key={cat.id}
+                                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600"
+                                        >
+                                            {cat.title}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </div>
+                </div>
+            )}
+            {activeTab === 'applicants' && (
+                <div className="mt-6">
+                    {/* Filter theo status */}
+                    <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+                        {STATUS_FILTER_TABS.map((tab) => (
+                            <button
+                                key={tab.value}
+                                onClick={() => setStatusFilter(tab.value)}
+                                className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${statusFilter === tab.value
+                                        ? 'bg-amber-500 text-white'
+                                        : 'bg-white text-slate-600 hover:bg-slate-100'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {isLoadingApplicants ? (
+                        <div className="rounded-2xl border border-slate-100 bg-white py-16 text-center text-sm text-slate-400">
+                            Đang tải danh sách ứng viên...
+                        </div>
+                    ) : isApplicantsError ? (
+                        <div className="rounded-2xl border border-red-100 bg-red-50 py-16 text-center text-sm text-red-500">
+                            Không thể tải danh sách ứng viên.
+                        </div>
+                    ) : !applicantsData || applicantsData.results.length === 0 ? (
+                        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+                            <Users2 className="h-8 w-8 text-slate-300" />
+                            <p className="text-sm text-slate-500">Chưa có ứng viên nào ở trạng thái này.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {applicantsData.results.map((application) => (
+                                <ApplicantCard key={application.id} jobId={id} application={application} />
+                            ))}
+                        </div>
                     )}
                 </div>
-            </div>
+            )}
         </div>
     );
 }

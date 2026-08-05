@@ -1,4 +1,4 @@
-import { Application, ApplyJobPayload, GetMyApplicationsParams, PaginatedResponse } from '../types/application';
+import { Application, ApplyJobPayload, GetMyApplicationsParams, PaginatedResponse, CompanyApplication, UpdateStatusPayload } from '../types/application';
 
 async function parseErrorMessage(res: Response): Promise<string> {
     const body = await res.json().catch(() => null);
@@ -34,4 +34,27 @@ export const applicationService = {
         if (!res.ok) throw new Error(await parseErrorMessage(res));
         return res.json();
     },
+    getJobApplicants: async (
+        jobId: number,
+        status?: string
+    ): Promise<PaginatedResponse<CompanyApplication>> => {
+        const query = status ? `?status=${encodeURIComponent(status)}` : '';
+        const res = await fetch(`/api/applications/job/${jobId}${query}`, { method: 'GET' });
+        if (!res.ok) throw new Error(await parseErrorMessage(res));
+        return res.json();
+    },
+
+    updateApplicationStatus: async (
+        applicationId: number,
+        payload: UpdateStatusPayload
+    ): Promise<CompanyApplication> => {
+        const res = await fetch(`/api/applications/update-status/${applicationId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(await parseErrorMessage(res));
+        return res.json();
+    },
 };
+

@@ -6,6 +6,7 @@ from jobs.models import JobPost
 from core.permission import have_role, get_owned_or_403
 from .models import Application
 from django.shortcuts import get_object_or_404
+from.tasks import send_application_status_email_task
 
 @transaction.atomic
 def apply_job_services(*,user:Account,job_post_id:int, data:dict):
@@ -27,12 +28,22 @@ def apply_job_services(*,user:Account,job_post_id:int, data:dict):
     return application
 
 @transaction.atomic
-def update_application_status(*, user: Account,application_id, status_val):
+def update_application_status(*, user: Account,data: dict, application_id):
     have_role(user=user, role = 'company')
     application = get_object_or_404(Application,pk = application_id, job_post__company = user.company)
-
+    status_val = data.get('status')
     application.status = status_val
-    application.save(update_fields=['status'])
+    updated_field = ['status', 'updated_at']
+
+    if status_val == Application.Status.INTERVIEWING:
+        application.interview_date = data.get('interview_date')
+        updated_field.append('interview_date')
+    if status_val == Application.Status.REJECTED:
+        application.rejected_reason = data.get('rejected_reason')
+        updated_field.append('rejected_reason')
+    application.save(update_fields=updated_field)
+
+    transaction.on_commit(lambda: send_application_status_email_task.delay(application.id))
     return application
 
 

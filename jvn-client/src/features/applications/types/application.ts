@@ -35,3 +35,21 @@ export interface GetMyApplicationsParams {
     status?: ApplicationStatus;
     page?: number;
 }
+
+export interface CompanyApplication {
+    id: number;
+    applicant_name: string;
+    cv: CV;
+    cover_letter: string;
+    status: ApplicationStatus;
+    date_applied: string;
+    updated_at: string;
+    interview_date: string | null;
+    rejected_reason: string;
+}
+
+export interface UpdateStatusPayload {
+    status: ApplicationStatus;
+    interview_date?: string;
+    rejected_reason?: string;
+}

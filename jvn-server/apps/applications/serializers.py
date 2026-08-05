@@ -14,10 +14,18 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['id', 'applicant_name', 'cv', 'job_post', 'cover_letter', 'status', 'date_applied']
+        fields = ['id', 'applicant_name', 'cv', 'job_post', 'cover_letter', 'status', 'date_applied', 'interview_date', 'rejected_reason']
 
 class UpdateStatusSerializer(serializers.Serializer):
     status = serializers.CharField(max_length = 20)
+    interview_date = serializers.DateTimeField(required = False, allow_null = True)
+    rejected_reason = serializers.CharField(required = False, allow_null = True)
+    def validate(self, attrs):
+        if attrs.get('status') == Application.Status.INTERVIEWING and not attrs.get('interview_date'):
+            raise serializers.ValidationError(
+                {'interview_date': 'Bắt buộc nhập thời gian phỏng vấn khi chuyển trạng thái Phỏng vấn.'}
+            )
+        return attrs
 
 class SeekerApplicationSerializer(serializers.ModelSerializer):
     cv = CVSerializer(read_only=True)
@@ -25,7 +33,7 @@ class SeekerApplicationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Application
-        fields = ['id', 'cv', 'job_post', 'cover_letter', 'status', 'date_applied']
+        fields = ['id', 'cv', 'job_post', 'cover_letter', 'status', 'date_applied', 'interview_date', 'rejected_reason']
 
 class CompanyApplicationSerializer(serializers.ModelSerializer):
     cv = CVSerializer(read_only=True)
@@ -33,4 +41,4 @@ class CompanyApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['id', 'applicant_name', 'cv', 'cover_letter', 'status', 'date_applied']
+        fields = ['id', 'applicant_name', 'cv', 'cover_letter', 'status', 'date_applied', 'interview_date', 'rejected_reason']

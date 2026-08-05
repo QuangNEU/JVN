@@ -24,7 +24,7 @@ class UpdateApplicationStatusView(APIView):
         serializer = UpdateStatusSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        application_updated = update_application_status(user = request.user, application_id= application_id, status_val= data.get('status') )
+        application_updated = update_application_status(user = request.user, application_id= application_id, data= data )
         return Response(CompanyApplicationSerializer(application_updated).data, status= status.HTTP_200_OK)
     
 class GetMyApplicationView(APIView):
