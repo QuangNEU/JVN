@@ -1,7 +1,7 @@
 from django.db import transaction
 from accounts.models import Account
 from core.permission import get_owned_or_403,have_role
-from .models import Category,JobPost
+from .models import Category,JobPost, SavedJob
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from resumes.models import Tag
@@ -102,3 +102,21 @@ def delete_post_service(*, user:Account, post_id: int):
     job_post.status = JobPost.STATUS.CLOSED
     job_post.save(update_fields=['is_deleted', 'status'])
     return job_post
+
+@transaction.atomic
+def save_job_service(*, user: Account, job_post_id):
+    have_role(user = user, role = 'jobseeker')
+    job_post = get_object_or_404(JobPost, pk=job_post_id)
+    job_seeker = user.jobseeker
+    save_record = SavedJob.objects.filter(job_post= job_post, job_seeker= job_seeker).first()
+
+    if save_record:
+        save_record.delete()
+        is_saved = False
+        message = f'Đã bỏ lưu tin "{job_post.title}"'
+    else:
+        SavedJob.objects.create(job_seeker= job_seeker, job_post= job_post)
+        is_saved = True
+        message = f'Đã lưu tin "{job_post.title}"'
+        
+    return {'is_saved': is_saved, 'message': message}

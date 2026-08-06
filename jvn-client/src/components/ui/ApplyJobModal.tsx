@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { X, Send, FileText, Loader2, CheckCircle2 } from 'lucide-react';
 import { useApplyJob } from '@/features/applications/hooks/useApplyJob';
-// ADJUST: đổi đúng hook + path bạn dùng để lấy danh sách CV của seeker
 import { useCVs } from '@/features/resumes/hooks/useCVs';
 
 interface ApplyJobModalProps {
@@ -17,8 +16,7 @@ export default function ApplyJobModal({ jobPostId, jobTitle, isOpen, onClose }: 
     const [cvId, setCvId] = useState<number | ''>('');
     const [coverLetter, setCoverLetter] = useState('');
 
-    // ADJUST: nếu hook trả về shape khác (vd { data } thay vì mảng trực tiếp), sửa dòng dưới
-    const { data: cvs, isLoading: isLoadingCvs } = useCVs();
+    const { data: cvs, isLoading: isLoadingCvs } = useCVs({ enabled: isOpen });
     const applyJob = useApplyJob(jobPostId);
 
     if (!isOpen) return null;

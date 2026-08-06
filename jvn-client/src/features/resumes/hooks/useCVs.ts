@@ -4,10 +4,16 @@ import type { CVFormPayload } from "../types/cv";
 
 const CV_QUERY_KEY = ["cvs"] as const;
 
-export function useCVs() {
+interface UseCVsOptions {
+    enabled?: boolean;
+}
+
+export function useCVs(options: UseCVsOptions = {}) {
     return useQuery({
         queryKey: CV_QUERY_KEY,
         queryFn: cvService.list,
+        retry: false,
+        enabled: options.enabled ?? true,
     });
 }
 
@@ -46,7 +52,6 @@ export function useSetDefaultCV() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: number) => cvService.setDefault(id),
-        // Optimistic update: bỏ is_default cũ, gán cho id mới ngay trong cache
         onMutate: async (id: number) => {
             await queryClient.cancelQueries({ queryKey: CV_QUERY_KEY });
             const previous = queryClient.getQueryData(CV_QUERY_KEY);

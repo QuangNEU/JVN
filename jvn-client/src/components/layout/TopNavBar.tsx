@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, User, Briefcase, LogOut, FileText } from 'lucide-react';
+import { ChevronDown, User, Send, Heart, Building2, LogOut, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const navItems = [
@@ -23,7 +24,25 @@ export default function TopNavBar() {
     const { user, isAuthenticated, isLoading, logout } = useAuthStore();
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+    const [mounted, setMounted] = useState(false);
+    const avatarButtonRef = useRef<HTMLButtonElement>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        setMounted(true); // createPortal chỉ chạy được client-side, tránh lỗi hydration mismatch
+    }, []);
+
+    const handleOpenUserMenu = () => {
+        if (avatarButtonRef.current) {
+            const rect = avatarButtonRef.current.getBoundingClientRect();
+            setMenuPosition({
+                top: rect.bottom,
+                left: rect.left,
+            });
+        }
+        setUserMenuOpen(true);
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -81,11 +100,13 @@ export default function TopNavBar() {
                         </div>
                     ) : isAuthenticated && user ? (
                         <div
-                            className="relative"
-                            onMouseEnter={() => setUserMenuOpen(true)}
+                            onMouseEnter={handleOpenUserMenu}
                             onMouseLeave={() => setUserMenuOpen(false)}
                         >
-                            <button className="flex items-center gap-2 rounded-full border border-gray-200 py-1.5 pl-1.5 pr-3 hover:border-blue-300">
+                            <button
+                                ref={avatarButtonRef}
+                                className="flex items-center gap-2 rounded-full border border-gray-200 py-1.5 pl-1.5 pr-3 hover:border-blue-300"
+                            >
                                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
                                     {user.name?.charAt(0).toUpperCase()}
                                 </span>
@@ -93,25 +114,28 @@ export default function TopNavBar() {
                                 <ChevronDown className="h-4 w-4 text-gray-400" />
                             </button>
 
-                            {userMenuOpen && (
-                                <div className="absolute right-0 top-full pt-2">
+                            {/* Portal: render thẳng vào body, thoát khỏi stacking context của header */}
+                            {mounted && userMenuOpen && createPortal(
+                                <div
+                                    style={{ position: 'fixed', top: menuPosition.top, left: menuPosition.left, paddingTop: 8 }}
+                                    className="z-[100]"
+                                    onMouseEnter={() => setUserMenuOpen(true)}
+                                    onMouseLeave={() => setUserMenuOpen(false)}
+                                >
                                     <div className="flex w-56 flex-col rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
-                                        <Link
-                                            href="/profile"
-                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                                        >
+                                        <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
                                             <User className="h-4 w-4" /> Hồ sơ cá nhân
                                         </Link>
-                                        <Link
-                                            href="/applications"
-                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                                        >
-                                            <Briefcase className="h-4 w-4" /> Việc làm đã lưu
+                                        <Link href="/applications" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                                            <Send className="h-4 w-4" /> Việc làm đã ứng tuyển
                                         </Link>
-                                        <Link
-                                            href="/cvs"
-                                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                                        >
+                                        <Link href="/jobs/saved" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                                            <Heart className="h-4 w-4" /> Việc làm đã lưu
+                                        </Link>
+                                        <Link href="/companies/following" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                                            <Building2 className="h-4 w-4" /> Công ty đang theo dõi
+                                        </Link>
+                                        <Link href="/cvs" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
                                             <FileText className="h-4 w-4" /> Quản lý CV
                                         </Link>
 
@@ -124,21 +148,16 @@ export default function TopNavBar() {
                                             <LogOut className="h-4 w-4" /> Đăng xuất
                                         </button>
                                     </div>
-                                </div>
+                                </div>,
+                                document.body
                             )}
                         </div>
                     ) : (
                         <>
-                            <Link
-                                href="/register"
-                                className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50"
-                            >
+                            <Link href="/register" className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50">
                                 Đăng ký
                             </Link>
-                            <Link
-                                href="/login"
-                                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-                            >
+                            <Link href="/login" className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">
                                 Đăng nhập
                             </Link>
                         </>

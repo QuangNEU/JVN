@@ -19,10 +19,15 @@ def get_user_attr(user, attr_name:str):
     
 def get_company_selector():
     company = Company.objects.all()
-    return company
+    return company 
 
 def get_is_following(*, user, company_id):
-    have_role(user, 'jobseeker')
+    have_role(user = user, role ='jobseeker')
     company = Company.objects.get(pk = company_id)
     is_following = Follow.objects.filter(job_seeker = user.jobseeker, company = company).exists()
     return is_following
+
+def get_follow_company_selector(*, user:Account):
+    have_role(user=user, role='jobseeker')
+    followed_company = Follow.objects.filter(job_seeker= user.jobseeker).select_related('company', 'company__account').order_by('-created_at')
+    return followed_company

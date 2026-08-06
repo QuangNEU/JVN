@@ -178,7 +178,8 @@ def reset_password_service(*, data:dict):
         user.save(update_fields=['password'])
     else:
         raise ValidationError({'token':'Duong dan khoi phuc khong hop le hoac da het han'})
-    
+
+@transaction.atomic    
 def follow_service(*,user : Account,company_id:int):
     if user.role != Account.ROLE_CHOICES.SEEKER:
         raise ValidationError({'detail':'Chi co nguoi tim viec moi duoc theo doi cong ty'})

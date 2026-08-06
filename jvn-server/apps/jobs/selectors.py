@@ -1,6 +1,6 @@
 from .models import Category
 from core.permission import have_role
-from .models import JobPost
+from .models import JobPost, SavedJob
 from accounts.models import Account
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
@@ -90,3 +90,14 @@ def get_post_detail_selector(*, user:Account, post_id:int):
         return job_post
     
     raise PermissionDenied({'message':'You dont have the permission the read this post'})
+
+def is_saved_selector(*, user: Account, job_post_id):
+    if not user.is_authenticated or user.role != Account.ROLE_CHOICES.SEEKER:
+        return False
+    is_saved = SavedJob.objects.filter(job_seeker = user.jobseeker, job_post = job_post_id).exists()
+    return is_saved
+
+def get_saved_job_selector(*, user:Account):
+    have_role(user= user, role= 'jobseeker')
+    saved_job = SavedJob.objects.filter(job_seeker = user.jobseeker).select_related('job_post', 'job_post__company', 'job_post__company__account').prefetch_related('job_post__tags', 'job_post__category').order_by('-created_at')
+    return saved_job

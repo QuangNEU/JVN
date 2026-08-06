@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category,JobPost
+from .models import Category,JobPost, SavedJob
 from resumes.serializers import TagSerializer
 from resumes.models import CV
 
@@ -16,6 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return[]
 
 class JobPostSerializer(serializers.ModelSerializer):
+    company_id = serializers.IntegerField(read_only=True) 
     company_name = serializers.CharField(source='company.account.name', read_only=True)
     company_province = serializers.CharField(source='company.province', read_only=True)
     company_ward = serializers.CharField(source='company.ward', read_only=True)
@@ -40,7 +41,7 @@ class JobPostSerializer(serializers.ModelSerializer):
             'company_logo', 'company_headcount', 'company_industry',
             'level', 'type', 'status', 'experience_requirement', 'headcount',
             'salary_min', 'salary_max', 'currency', 'is_negotiable',
-            'date_posted', 'expiration_date', 'category', 'tags', ]
+            'date_posted', 'expiration_date', 'category', 'tags', 'company_id']
         
 class JobPostCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
@@ -62,3 +63,11 @@ class JobPostCreateSerializer(serializers.Serializer):
         if (data.get('salary_min') and data.get('salary_max') and data.get('salary_min') > data.get('salary_max')):
             raise serializers.ValidationError({'error':'min salary can not be smaller than max salary'})
         return data
+    
+class SavedJobSerializer(serializers.ModelSerializer):
+    job_post = JobPostSerializer(read_only=True)
+
+    class Meta:
+        model = SavedJob
+        fields = ['id', 'job_post', 'created_at']
+        read_only_fields = ['id', 'created_at']

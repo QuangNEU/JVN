@@ -66,6 +66,7 @@ export interface JobPost {
     company_logo: string | null;
     company_headcount: string | null;
     company_industry: string | null;
+    company_id: number | null
     // company_website: string | null;
     category: Category[];
     tags: Tag[];

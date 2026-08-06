@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer
+from core.pagnigation import StandardResultsPagination
+from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer
 from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout
-from .selectors import get_profile_detail_selector, get_is_following
+from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector
 
 # Create your views here.
 class RegisterView(APIView):
@@ -122,7 +123,7 @@ class MyDetailView(APIView):
 
 class FollowView(APIView):
     permission_classes=[IsAuthenticated]
-    def post(self,request,company_id):
+    def post(self, request, company_id):
         result = follow_service(
             user=request.user,
             company_id=company_id
@@ -137,3 +138,12 @@ class CheckFollowingView(APIView):
             company_id= company_id
         )
         return Response({'is_following': is_following}, status= status.HTTP_200_OK)
+    
+class MyFollowView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        followed_company = get_follow_company_selector(user= request.user)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(followed_company, request)
+        serializer = FollowSerializer(page, many = True)
+        return paginator.get_paginated_response(serializer.data)

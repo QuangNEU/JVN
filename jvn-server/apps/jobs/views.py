@@ -2,11 +2,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
-from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer
+from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
-from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service
-from .selectors import get_pending_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector
+from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service
+from .selectors import get_pending_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector
 # Create your views here.
 
 
@@ -104,3 +104,25 @@ class JobPostDetailView(APIView):
     def delete(self, request, post_id):
         job_post = delete_post_service(user=request.user, post_id= post_id)
         return Response({'message':'Delete Successfully'},status=status.HTTP_200_OK)
+    
+class SaveJobView(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self, request, job_post_id):
+        result = save_job_service(user= request.user, job_post_id=job_post_id)
+        return Response(result, status= status.HTTP_200_OK)
+    
+class MySavedJobView(APIView):
+    permission_classes= [IsAuthenticated]
+    def get(self, request):
+        saved_job = get_saved_job_selector(user = request.user)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(saved_job, request)
+        serializer = SavedJobSerializer(page, many = True)
+        return paginator.get_paginated_response(serializer.data)
+
+    
+class CheckSavedJobView(APIView):
+    permission_classes=[AllowAny]
+    def get(self, request, job_post_id):
+        is_saved = is_saved_selector(user= request.user, job_post_id= job_post_id)
+        return Response({'is_saved': is_saved}, status=status.HTTP_200_OK)

@@ -96,6 +96,14 @@ class CompanyDetailSerializer(serializers.ModelSerializer):
     def get_followers_count(self, obj):
         return obj.followers.count()
     
+class CompanySerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='account_id', read_only=True)
+    name = serializers.CharField(source='account.name', read_only=True)
+
+    class Meta:
+        model = Company
+        fields = ['id', 'name', 'logo', 'province', 'ward', 'industry', 'headcount']
+    
 class AccountDetailSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
     class Meta:
@@ -130,3 +138,10 @@ class UpdateDetailSerializer(serializers.Serializer):
     tax_code = serializers.CharField(max_length=20, required=False, allow_blank=True)
     industry = serializers.CharField(max_length=100, required=False, allow_blank=True)
     
+class FollowSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ['id', 'company', 'created_at']
+        read_only_fields = ['id', 'created_at']

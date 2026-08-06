@@ -6,3 +6,17 @@ export const HEADCOUNT_OPTIONS = [
     { value: '500-999', label: '500-999 nhân viên' },
     { value: '1000+', label: 'Trên 1000 nhân viên' },
 ];
+
+export interface Company {
+    id: number;
+    name: string;
+    logo: string | null;
+    description: string | null;
+    headcount: string | null;
+    province: string;
+    ward: string;
+    exact_address: string | null;
+    website: string | null;
+    industry: string | null;
+    founded_date: string | null;
+}

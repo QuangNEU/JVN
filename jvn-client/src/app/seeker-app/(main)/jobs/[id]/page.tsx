@@ -9,6 +9,10 @@ import {
     Clock, Building2, Users, Briefcase, TrendingUp, ChevronRight, Info,
     ShieldCheck, X,
 } from 'lucide-react';
+import { useSaveJob } from '@/features/jobs/hooks/useSavedJob';
+import { useCheckSavedJob } from '@/features/jobs/hooks/useCheckSavedJob';
+import { useFollowCompany } from '@/features/follow/hooks/useFollowCompany';
+import { useCheckFollowing } from '@/features/follow/hooks/useCheckFollowing';
 import { usePublicJobDetail, usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 import { JobPost } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
@@ -53,12 +57,36 @@ export default function PublicJobDetailPage() {
     const params = useParams();
     const id = Number(params.id);
     const { data: job, isLoading, isError } = usePublicJobDetail(id);
-    const [isSaved, setIsSaved] = useState(false);
     const [copied, setCopied] = useState(false);
     const [activeTab, setActiveTab] = useState<'detail' | 'related'>('detail');
     const [showApplyModal, setShowApplyModal] = useState(false);
     const router = useRouter();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const { data: savedData } = useCheckSavedJob(id);
+    const saveJob = useSaveJob(id);
+    const isSaved = savedData?.is_saved ?? false;
+
+    const { data: followingData } = useCheckFollowing(job?.company_id ?? 0);
+    const followCompany = useFollowCompany(job?.company_id ?? 0);
+    const isFollowing = followingData?.is_following ?? false;
+
+    const handleToggleSave = () => {
+        if (!isAuthenticated) {
+            router.push(`/login?redirect=/jobs/${id}`);
+            return;
+        }
+        if (saveJob.isPending) return;
+        saveJob.mutate();
+    };
+
+    const handleToggleFollow = () => {
+        if (!isAuthenticated) {
+            router.push(`/login?redirect=/jobs/${id}`);
+            return;
+        }
+        if (followCompany.isPending) return;
+        followCompany.mutate();
+    };
 
     const handleApplyClick = () => {
         if (!isAuthenticated) {
@@ -192,11 +220,12 @@ export default function PublicJobDetailPage() {
                                     <Send className="h-4 w-4" /> Ứng tuyển ngay
                                 </button>
                                 <button
-                                    onClick={() => setIsSaved((v) => !v)}
-                                    className={`flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold ${isSaved ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-600 hover:border-blue-300'
+                                    onClick={handleToggleSave}
+                                    disabled={saveJob.isPending}
+                                    className={`flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold disabled:opacity-60 ${isSaved ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-600 hover:border-blue-300'
                                         }`}
                                 >
-                                    <Heart className={`h-4 w-4 ${isSaved ? 'fill-blue-600' : ''}`} /> Lưu tin
+                                    <Heart className={`h-4 w-4 ${isSaved ? 'fill-blue-600' : ''}`} /> {isSaved ? 'Đã lưu' : 'Lưu tin'}
                                 </button>
                             </div>
                         </div>
@@ -364,6 +393,16 @@ export default function PublicJobDetailPage() {
                             >
                                 Xem các tin khác của công ty
                             </Link>
+                            <button
+                                onClick={handleToggleFollow}
+                                disabled={followCompany.isPending}
+                                className={`mt-2 block w-full rounded-full py-2.5 text-center text-sm font-semibold disabled:opacity-60 ${isFollowing
+                                    ? 'border border-slate-200 text-slate-500 hover:border-red-300 hover:text-red-500'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                    }`}
+                            >
+                                {isFollowing ? 'Đang theo dõi' : 'Theo dõi công ty'}
+                            </button>
                         </div>
 
                         {/* Thông tin chung */}

@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Account,Company
+from accounts.models import Account,Company, JobSeeker
 from resumes.models import CV,Tag
 # Create your models here.
 class Category(models.Model):
@@ -58,4 +58,14 @@ class JobPost(models.Model):
         ]
     def __str__(self):
         return f"{self.title} - {self.company.account.name}"
-    
+
+class SavedJob(models.Model):
+    job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='saved_jobs')
+    job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE, related_name='saved_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('job_seeker', 'job_post')
+
+    def __str__(self):
+        return f"{self.job_seeker} saved {self.job_post}"
