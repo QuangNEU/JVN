@@ -63,6 +63,12 @@ axiosClient.interceptors.response.use(
             }
         }
 
+        if (error.response?.status === 429) {
+            const waitSeconds = error.response.headers['retry-after'];
+            (error as any).retryAfter = waitSeconds;
+            return Promise.reject(error);
+        }
+
         return Promise.reject(error);
     }
 );

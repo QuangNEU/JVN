@@ -27,7 +27,7 @@ export interface PublicJobFilterPayload {
     salary_min?: number;
     salary_max?: number;
     level?: JobLevelType;
-    category_id?: number;
+    category_ids?: number[];
     type?: JobTypeType;
 }
 

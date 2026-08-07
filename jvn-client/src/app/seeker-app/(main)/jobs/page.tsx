@@ -7,6 +7,7 @@ import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { PublicJobFilterPayload, JobLevelType, JobTypeType } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
+import CategoryCheckboxTree from '@/features/jobs/components/CategoryCheckboxTree';
 
 const typeOptions: { value: JobTypeType; label: string }[] = [
     { value: 'FULLTIME', label: 'Toàn thời gian' },
@@ -31,6 +32,7 @@ function JobSearchContent() {
     const [filters, setFilters] = useState<PublicJobFilterPayload>({
         keyword: searchParams.get('keyword') || undefined,
         location: searchParams.get('location') || undefined,
+        category_ids: searchParams.getAll('category_ids').map(Number),
     });
     const [page, setPage] = useState(1);
     const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');
@@ -38,7 +40,6 @@ function JobSearchContent() {
     const [salaryMinInput, setSalaryMinInput] = useState('');
     const [salaryMaxInput, setSalaryMaxInput] = useState('');
 
-    // đồng bộ lại nếu người dùng search lại từ trang chủ (URL đổi query)
     useEffect(() => {
         setKeywordInput(searchParams.get('keyword') || '');
         setLocationInput(searchParams.get('location') || '');
@@ -46,6 +47,7 @@ function JobSearchContent() {
             ...f,
             keyword: searchParams.get('keyword') || undefined,
             location: searchParams.get('location') || undefined,
+            category_ids: searchParams.getAll('category_ids').map(Number),
         }));
         setPage(1);
     }, [searchParams]);
@@ -169,18 +171,15 @@ function JobSearchContent() {
                             {categories && categories.length > 0 && (
                                 <div>
                                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Danh mục</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {categories.map((cat) => (
-                                            <button
-                                                key={cat.id}
-                                                onClick={() => toggleSingleFilter('category_id', cat.id)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${filters.category_id === cat.id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                                                    }`}
-                                            >
-                                                {cat.title}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <CategoryCheckboxTree
+                                        categories={categories}
+                                        selectedIds={filters.category_ids ?? []}
+                                        onChange={(ids) => {
+                                            setFilters((f) => ({ ...f, category_ids: ids }));
+                                            setPage(1);
+                                        }}
+                                        mode="filter"
+                                    />
                                 </div>
                             )}
                         </div>

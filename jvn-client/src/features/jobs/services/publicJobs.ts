@@ -9,7 +9,17 @@ export interface PublicJobListParams extends PublicJobFilterPayload {
 export async function getPublicJobs(
     params: PublicJobListParams = {}
 ): Promise<PaginatedResponse<JobPost>> {
-    const response = await axiosClient.get('/jobs/public', { params });
+    const { category_ids, ...rest } = params;
+    const query = new URLSearchParams();
+
+    Object.entries(rest).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            query.append(key, String(value));
+        }
+    });
+    (category_ids ?? []).forEach((id) => query.append('category_ids', String(id)));
+
+    const response = await axiosClient.get(`/jobs/public?${query.toString()}`);
     return response.data;
 }
 

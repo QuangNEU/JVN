@@ -7,17 +7,28 @@ from rest_framework.exceptions import PermissionDenied
 from resumes.models import Tag
 from rest_framework.serializers import ValidationError
 from django.utils import timezone
+from . selectors import get_valid_leaf_categories
+
 @transaction.atomic
-def create_category_service(*, user:Account, data:dict):
-    have_role(user=user,role ='company')
+def create_category_service(*, user: Account, data: dict):
+    have_role(user=user, role='company')
     parent = None
-    if data.get('parent_id'):
-        parent = get_object_or_404(Category, id=data.parent_id)
-    category=Category.objects.create(
+    parent_id = data.get('parent_id')
+
+    if parent_id:
+        parent = get_object_or_404(
+            Category, id=parent_id, status=Category.Status.APPROVED
+        )
+        if parent.parent_id is not None:
+            raise ValidationError({
+                'error': 'Không thể chọn category con làm cha — hệ thống chỉ hỗ trợ 2 cấp'
+            })
+
+    category = Category.objects.create(
         title=data.get('title'),
         status=Category.Status.PENDING,
-        created_by = user,
-        parent = parent
+        created_by=user,
+        parent=parent
     )
     return category
 
@@ -43,11 +54,11 @@ def approve_category_service(*,user: Account,category_id:int):
     }
 
 @transaction.atomic
-def create_post_service(*,user :Account,data:dict):
-    have_role(user=user,role='company')
-    company =user.company
-    tag_ids = data.pop('tag_ids',[])
-    category_ids = data.pop('category_ids',[])
+def create_post_service(*, user: Account, data: dict):
+    have_role(user=user, role='company')
+    company = user.company
+    tag_ids = data.pop('tag_ids', [])
+    category_ids = data.pop('category_ids', [])
 
     job_post = JobPost.objects.create(
         company=company,
@@ -56,15 +67,13 @@ def create_post_service(*,user :Account,data:dict):
         **data
     )
     if tag_ids:
-        tags = Tag.objects.filter(id__in = tag_ids)
+        tags = Tag.objects.filter(id__in=tag_ids)
         if tags.count() != len(set(tag_ids)):
-            raise ValidationError({'error':'Some tags is not exists'})
+            raise ValidationError({'error': 'Some tags is not exists'})
         job_post.tags.set(tags)
-    
+
     if category_ids:
-        categories = Category.objects.filter(id__in = category_ids, status = Category.Status.APPROVED)
-        if categories.count() != len(set(category_ids)):
-            raise ValidationError({'error':'Some category is not exists'})
+        categories = get_valid_leaf_categories(category_ids)   # ← thay đoạn cũ
         job_post.category.set(categories)
     return job_post
 
@@ -88,9 +97,7 @@ def update_post_service(*, user:Account, post_id:int, data :dict):
         job_post.tags.set(tags)
     
     if category_ids is not None:
-        categories = Category.objects.filter(id__in=category_ids, status='APPROVED')
-        if categories.count() != len(set(category_ids)):
-            raise ValidationError({'error': 'Some category is not exists or not approved'})
+        categories = get_valid_leaf_categories(category_ids)   # ← thay đoạn cũ
         job_post.category.set(categories)
     return job_post
 

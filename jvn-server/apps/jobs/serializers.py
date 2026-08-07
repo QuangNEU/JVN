@@ -3,6 +3,10 @@ from .models import Category,JobPost, SavedJob
 from resumes.serializers import TagSerializer
 from resumes.models import CV
 
+class CategoryCreateSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255)
+    parent_id = serializers.IntegerField(required=False, allow_null=True)
+
 class CategorySerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
@@ -10,10 +14,9 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id','title','children']
 
-    def get_children(self,obj):
-        if obj.children.exists():
-            return CategorySerializer(obj.children.all(),many=True).data
-        return[]
+    def get_children(self, obj):
+        approved_children = obj.children.filter(status=Category.Status.APPROVED)
+        return CategorySerializer(approved_children, many=True).data
 
 class JobPostSerializer(serializers.ModelSerializer):
     company_id = serializers.IntegerField(read_only=True) 

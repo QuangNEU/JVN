@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.pagnigation import StandardResultsPagination
+from .throttles import LoginRateThrottle
 from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer
 from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout
 from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector
@@ -39,6 +40,7 @@ class RegisterView(APIView):
     
 class LoginView(APIView):
     permission_classes=[AllowAny]
+    throttle_classes= [LoginRateThrottle]
     def post(self, request):
         serializer = LoginSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)

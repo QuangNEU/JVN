@@ -4,19 +4,47 @@ from .models import JobPost, SavedJob
 from accounts.models import Account
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
-from django.db.models import Q 
+from django.db.models import Q, Count
 from django.utils import timezone
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
+
+
+def get_valid_leaf_categories(category_ids: list[int]):
+    categories = Category.objects.filter(
+        id__in=category_ids,
+        status=Category.Status.APPROVED
+    ).annotate(
+        approved_children_count=Count(
+            'children', filter=Q(children__status=Category.Status.APPROVED)
+        )
+    ).filter(approved_children_count=0)
+
+    if categories.count() != len(set(category_ids)):
+        raise ValidationError({
+            'error': 'Một số category không hợp lệ, chưa được duyệt, hoặc là category nhóm (cần chọn category cụ thể hơn)'
+        })
+    return categories
+
+
+
 
 def get_approved_category_service():
-    categories = Category.objects.filter(status = Category.Status.APPROVED).select_related('parent')
-    return categories 
+    return Category.objects.filter(
+        status=Category.Status.APPROVED,
+        parent__isnull=True
+    ).prefetch_related('children')
 
 def get_pending_category_service(*,user:Account):
     if user.role != Account.ROLE_CHOICES.ADMIN:
         raise PermissionDenied({'detail': 'Dont have permission'})
     categories = Category.objects.filter(status = Category.Status.PENDING).select_related('parent')
     return categories
+
+def expand_category_ids(category_ids: list[int]) -> list[int]:
+    child_ids = Category.objects.filter(
+        parent_id__in=category_ids, status=Category.Status.APPROVED
+    ).values_list('id', flat=True)
+    return list(set(category_ids) | set(child_ids))
 
 def company_read_post_service(*,user:Account, status_filter = None):
     have_role(user=user,role='company')
@@ -69,9 +97,10 @@ def public_read_post_service(*, filters: dict = None):
     if job_type:
         queryset = queryset.filter(type=job_type)
 
-    category_id = filters.get('category_id')
-    if category_id:
-        queryset = queryset.filter(category__id=category_id)
+    category_ids = filters.get('category_ids')  
+    if category_ids:
+        expanded_ids = expand_category_ids(category_ids)
+        queryset = queryset.filter(category__id__in=expanded_ids).distinct()
 
     return queryset.order_by('-date_posted')
 

@@ -96,12 +96,14 @@ export default function PublicJobDetailPage() {
         setShowApplyModal(true);
     };
 
-    const relatedCategoryId = job?.category?.[0]?.id;
+    const relatedCategoryIds = job?.category?.map((c) => c.id) ?? [];
     const { data: relatedData } = usePublicJobs({
-        category_id: relatedCategoryId,
+        category_ids: relatedCategoryIds.length > 0 ? relatedCategoryIds : undefined,
         page: 1,
         page_size: 6,
-    });
+    },
+        { enabled: relatedCategoryIds.length > 0 }
+    );
     const relatedJobs = (relatedData?.results ?? []).filter((j) => j.id !== id);
 
     const handleCopyLink = () => {
@@ -142,7 +144,7 @@ export default function PublicJobDetailPage() {
                     {job.category?.[0] && (
                         <>
                             <ChevronRight className="h-3.5 w-3.5" />
-                            <Link href={`/jobs?category_id=${job.category[0].id}`} className="hover:text-blue-600">
+                            <Link href={`/jobs?category_ids=${job.category[0].id}`} className="hover:text-blue-600">
                                 {job.category[0].title}
                             </Link>
                         </>
@@ -237,7 +239,7 @@ export default function PublicJobDetailPage() {
                                 <div className="flex flex-wrap items-start gap-3">
                                     <span className="w-24 shrink-0 text-slate-400">Yêu cầu:</span>
                                     <div className="flex flex-1 flex-wrap gap-2">
-                                        <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{job.experience_requirement}</span>
+                                        <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{job.experience_requirement == '0' ? "Không yêu cầu kinh nghiệm" : `${job.experience_requirement} năm kinh nghiệm`}</span>
                                         <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{levelLabels[job.level] ?? job.level}</span>
                                     </div>
                                 </div>
@@ -434,7 +436,7 @@ export default function PublicJobDetailPage() {
                                     {job.category.map((cat) => (
                                         <Link
                                             key={cat.id}
-                                            href={`/jobs?category_id=${cat.id}`}
+                                            href={`/jobs?category_ids=${cat.id}`}
                                             className="rounded-full border border-slate-200 px-3.5 py-2 text-sm text-slate-600 hover:border-blue-400 hover:text-blue-600"
                                         >
                                             {cat.title}

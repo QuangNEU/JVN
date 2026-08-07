@@ -10,7 +10,7 @@ class CVSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many = True, read_only = True)
     class Meta:
         model = CV
-        fields = ['id','title','file','level','tags','created_at']
+        fields = ['id','title','file','level','tags','created_at','is_default']
 
 class CVCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length = 255)

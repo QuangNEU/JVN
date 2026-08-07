@@ -131,7 +131,16 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle', 
+        'rest_framework.throttling.UserRateThrottle'  
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute',  
+        'user': '100/minute', 
+        'login': '5/minute',
+    }
 }
 
 # Cấu hình thời hạn của Token (JWT)

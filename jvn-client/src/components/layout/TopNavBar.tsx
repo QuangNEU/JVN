@@ -22,26 +22,32 @@ const navItems = [
 
 export default function TopNavBar() {
     const { user, isAuthenticated, isLoading, logout } = useAuthStore();
-    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-    const [mounted, setMounted] = useState(false);
     const avatarButtonRef = useRef<HTMLButtonElement>(null);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [navMenuPosition, setNavMenuPosition] = useState({ top: 0, left: 0 });
+
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        setMounted(true); // createPortal chỉ chạy được client-side, tránh lỗi hydration mismatch
+        setMounted(true);
     }, []);
 
     const handleOpenUserMenu = () => {
         if (avatarButtonRef.current) {
             const rect = avatarButtonRef.current.getBoundingClientRect();
-            setMenuPosition({
-                top: rect.bottom,
-                left: rect.left,
-            });
+            setMenuPosition({ top: rect.bottom, left: rect.left });
         }
         setUserMenuOpen(true);
+    };
+
+    const handleNavMouseEnter = (e: React.MouseEvent<HTMLDivElement>, label: string) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setNavMenuPosition({ top: rect.bottom, left: rect.left });
+        setOpenDropdown(label);
     };
 
     const handleLogout = async () => {
@@ -50,7 +56,11 @@ export default function TopNavBar() {
         router.push('/login');
     };
 
+    // Tìm dữ liệu dropdown đang được active
+    const activeNavDropdown = navItems.find(item => item.label === openDropdown)?.dropdown;
+
     return (
+        // Header vẫn giữ z-10 bình thường, để thanh Search có thể đè lên khi scroll
         <header className="sticky top-0 z-10 border-b border-gray-100 bg-white">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
                 {/* Logo */}
@@ -64,7 +74,7 @@ export default function TopNavBar() {
                         <div
                             key={item.label}
                             className="relative"
-                            onMouseEnter={() => item.dropdown && setOpenDropdown(item.label)}
+                            onMouseEnter={(e) => item.dropdown && handleNavMouseEnter(e, item.label)}
                             onMouseLeave={() => item.dropdown && setOpenDropdown(null)}
                         >
                             <Link
@@ -74,25 +84,33 @@ export default function TopNavBar() {
                                 {item.label}
                                 {item.dropdown && <ChevronDown className="h-4 w-4" />}
                             </Link>
-
-                            {item.dropdown && openDropdown === item.label && (
-                                <div className="absolute left-0 top-full w-56 rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
-                                    {item.dropdown.map((sub) => (
-                                        <Link
-                                            key={sub.label}
-                                            href={sub.href}
-                                            className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
-                                        >
-                                            {sub.label}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
                         </div>
                     ))}
                 </nav>
 
-                {/* Auth area */}
+                {mounted && openDropdown && activeNavDropdown && createPortal(
+                    <div
+                        style={{ position: 'fixed', top: navMenuPosition.top, left: navMenuPosition.left, paddingTop: 8 }}
+                        className="z-[100]"
+                        onMouseEnter={() => setOpenDropdown(openDropdown)}
+                        onMouseLeave={() => setOpenDropdown(null)}
+                    >
+                        <div className="flex w-56 flex-col rounded-lg border border-gray-100 bg-white py-2 shadow-lg">
+                            {activeNavDropdown.map((sub) => (
+                                <Link
+                                    key={sub.label}
+                                    href={sub.href}
+                                    className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                                >
+                                    {sub.label}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>,
+                    document.body
+                )}
+
+                {/* Auth area (Giữ nguyên như cũ của bạn) */}
                 <div className="flex items-center gap-3">
                     {isLoading ? (
                         <div className="flex items-center gap-3">
@@ -114,7 +132,7 @@ export default function TopNavBar() {
                                 <ChevronDown className="h-4 w-4 text-gray-400" />
                             </button>
 
-                            {/* Portal: render thẳng vào body, thoát khỏi stacking context của header */}
+                            {/* Portal cho User Menu */}
                             {mounted && userMenuOpen && createPortal(
                                 <div
                                     style={{ position: 'fixed', top: menuPosition.top, left: menuPosition.left, paddingTop: 8 }}

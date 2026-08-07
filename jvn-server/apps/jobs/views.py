@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
-from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer
+from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service
@@ -13,7 +13,7 @@ from .selectors import get_pending_category_service,get_approved_category_servic
 class CategoryCreateView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        serializer = CategorySerializer(data = request.data)
+        serializer = CategoryCreateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         category = create_category_service(user=request.user,data = data)
@@ -67,6 +67,8 @@ class CompanyJobPostView(APIView):
 class PublicJobPostView(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
+        category_ids_raw = request.query_params.getlist('category_ids')
+        category_ids = [int(cid) for cid in category_ids_raw if cid.isdigit()]
         filters = {
             'keyword': request.query_params.get('keyword'),
             'location': request.query_params.get('location'),
@@ -74,7 +76,7 @@ class PublicJobPostView(APIView):
             'salary_max': request.query_params.get('salary_max'),
             'level': request.query_params.get('level'),
             'type': request.query_params.get('type'),
-            'category_id': request.query_params.get('category_id'),
+            'category_ids': category_ids,
         }
         job_posts = public_read_post_service(filters=filters)
 

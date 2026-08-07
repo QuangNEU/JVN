@@ -5,11 +5,15 @@ from accounts.models import Account
 from rest_framework.exceptions import ValidationError,PermissionDenied
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
+from core.validator import validate_cv_file
 
 @transaction.atomic
 def create_cv_service(*,user:Account, data:dict):
     if user.role != Account.ROLE_CHOICES.SEEKER:
         raise ValidationError({'detail':'Chi ung vien moi co the tai len CV'})
+    file_obj = data.get('file')
+    if file_obj:
+        validate_cv_file(file_obj)
     job_seeker = user.jobseeker
     cv = CV.objects.create(
         job_seeker = job_seeker,
@@ -32,7 +36,10 @@ def delete_cv_service(*,user:Account,cv_id:int):
     if cv.job_seeker != jobseeker:
         raise PermissionDenied({'detail':'Chi co chu so huu moi co the xoa'})
     if cv.file:
-        cv.file.delete(save=False)
+        try:
+            cloudinary.uploader.destroy(cv.file.name)
+        except Exception as e:
+            print(f'Lỗi {e}: Không thể xóa file trên cloudinary')
     cv.delete()
     return True
 
@@ -57,6 +64,9 @@ def update_cv_service(*,user:Account,data:dict,cv_id:int):
     get_owned_or_403(user=user,profile_attr='jobseeker',obj=cv,owner_field='job_seeker')
     if 'file' in data:
         new_file = data.pop('file')
+        if new_file:
+            validate_cv_file(new_file)
+            
         if cv.file:
             try:
                 cloudinary.uploader.destroy(cv.file.name)

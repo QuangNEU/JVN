@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useTags } from '@/features/resumes/hooks/useTag';
 import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { JobPostFormData, JobLevelType, JobTypeType } from '@/features/jobs/types/jobs';
+import CategoryCheckboxTree from '@/features/jobs/components/CategoryCheckboxTree';
 
 const typeOptions: { value: JobTypeType; label: string }[] = [
     { value: 'FULLTIME', label: 'Toàn thời gian' },
@@ -289,19 +290,16 @@ export default function JobPostFormFields({
             {categories && categories.length > 0 && (
                 <div>
                     <label className="mb-2 block text-sm font-semibold text-slate-700">Danh mục ngành nghề</label>
-                    <div className="flex flex-wrap gap-2">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat.id} type="button" onClick={() => toggleCategory(cat.id)}
-                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${form.category_ids.includes(cat.id)
-                                    ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                                    }`}
-                            >
-                                {cat.title}
-                            </button>
-                        ))}
-                    </div>
+                    <p className="mb-2 text-xs text-slate-400">
+                        Chọn vị trí cụ thể — không chọn được nhóm ngành lớn
+                    </p>
+                    <CategoryCheckboxTree
+                        categories={categories}
+                        selectedIds={form.category_ids}
+                        onChange={(ids) => update('category_ids', ids)}
+                        mode="leaf-only"
+                        accentClassName="bg-amber-500"
+                    />
                 </div>
             )}
 
