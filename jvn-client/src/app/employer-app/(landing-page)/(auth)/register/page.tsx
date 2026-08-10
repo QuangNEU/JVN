@@ -9,12 +9,15 @@ import { register } from '@/features/accounts/services/accountService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getRedirectByRole } from '@/utils/getRedirectPathByRole';
 import { Role } from '@/features/accounts/types/account';
+import { ProvinceWardValue } from '@/features/locations/types/vnLocations';
+import ProvinceWardSelect from '@/features/locations/components/ProvinceWardSelect';
 
 export default function RegisterCompanyPage() {
-    const [form, setForm] = useState({ email: '', password: '', name: '', ward: '', tel: '', province: '' })
+    const [form, setForm] = useState({ email: '', password: '', name: '', tel: '' })
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [location, setLocation] = useState<ProvinceWardValue>({});
     const router = useRouter()
     const setAuth = useAuthStore((state) => state.setAuth)
 
@@ -24,7 +27,10 @@ export default function RegisterCompanyPage() {
         e.preventDefault()
         setLoading(true)
         try {
-            const data = await register({ ...form, role: Role.COMPANY })
+            const data = await register({
+                ...form, province: location.provinceName,
+                ward: location.wardName, role: Role.COMPANY
+            })
             setAuth(data.user)
             router.push(getRedirectByRole(data.user.role))
         } catch (err: any) {
@@ -99,26 +105,8 @@ export default function RegisterCompanyPage() {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="mb-1.5 block text-sm font-semibold text-slate-700">Tỉnh/Thành phố</label>
-                            <input
-                                type="text" required value={form.province}
-                                onChange={(e) => update('province', e.target.value)}
-                                placeholder="Hà Nội"
-                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-amber-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1.5 block text-sm font-semibold text-slate-700">Quận/Huyện</label>
-                            <input
-                                type="text" required value={form.ward}
-                                onChange={(e) => update('ward', e.target.value)}
-                                placeholder="Cầu Giấy"
-                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-amber-500"
-                            />
-                        </div>
-                    </div>
+                    <ProvinceWardSelect value={location} onChange={setLocation} accentClassName="border-orange-500" />
+
 
                     {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
 

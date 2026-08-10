@@ -35,12 +35,6 @@ export default function CompanyTopBar({ onToggleSidebar }: { onToggleSidebar: ()
             </div>
 
             <div className="flex items-center gap-2">
-                <Link
-                    href="/jobs/new"
-                    className="hidden items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white hover:bg-amber-600 sm:flex"
-                >
-                    <Plus className="h-4 w-4" /> Đăng tin
-                </Link>
 
                 <button className="relative rounded-full p-2.5 text-slate-300 hover:bg-slate-800">
                     <Bell className="h-5 w-5" />

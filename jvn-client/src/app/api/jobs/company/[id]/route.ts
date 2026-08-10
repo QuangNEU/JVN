@@ -59,7 +59,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
     try {
         const djangoRes = await axios.delete(`${process.env.API_URL}/jobs/jobposts/${id}/`, {
-            headers: { Authorization: `BEARER ${accessToken}` }
+            headers: { Authorization: `Bearer ${accessToken}` }
         })
         return NextResponse.json(djangoRes.data)
     } catch (err: any) {

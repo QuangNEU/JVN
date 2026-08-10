@@ -2,12 +2,14 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, MapPin, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, MapPin, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { PublicJobFilterPayload, JobLevelType, JobTypeType } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
 import CategoryCheckboxTree from '@/features/jobs/components/CategoryCheckboxTree';
+import { SelectedLocation } from '@/features/locations/types/vnLocations';
+import LocationPickerModal from '@/features/locations/components/LocationPickerModal';
 
 const typeOptions: { value: JobTypeType; label: string }[] = [
     { value: 'FULLTIME', label: 'Toàn thời gian' },
@@ -29,24 +31,44 @@ function JobSearchContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [filters, setFilters] = useState<PublicJobFilterPayload>({
-        keyword: searchParams.get('keyword') || undefined,
-        location: searchParams.get('location') || undefined,
-        category_ids: searchParams.getAll('category_ids').map(Number),
-    });
+
     const [page, setPage] = useState(1);
     const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');
-    const [locationInput, setLocationInput] = useState(searchParams.get('location') || '');
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [selectedLocations, setSelectedLocations] = useState<SelectedLocation[]>(
+        searchParams.getAll('locations').map((name) => ({
+            key: `province:${name}`,
+            type: 'province' as const,
+            provinceCode: name,
+            provinceName: name,
+            name,
+        }))
+    );
     const [salaryMinInput, setSalaryMinInput] = useState('');
     const [salaryMaxInput, setSalaryMaxInput] = useState('');
 
+    const [filters, setFilters] = useState<PublicJobFilterPayload>({
+        keyword: searchParams.get('keyword') || undefined,
+        locations: searchParams.getAll('locations').length ? searchParams.getAll('locations') : undefined,
+        category_ids: searchParams.getAll('category_ids').map(Number),
+    });
+
     useEffect(() => {
         setKeywordInput(searchParams.get('keyword') || '');
-        setLocationInput(searchParams.get('location') || '');
+        const urlLocations = searchParams.getAll('locations');
+        setSelectedLocations(
+            urlLocations.map((name) => ({
+                key: `province:${name}`,
+                type: 'province',
+                provinceCode: name,
+                provinceName: name,
+                name,
+            }))
+        );
         setFilters((f) => ({
             ...f,
             keyword: searchParams.get('keyword') || undefined,
-            location: searchParams.get('location') || undefined,
+            locations: urlLocations.length ? urlLocations : undefined,
             category_ids: searchParams.getAll('category_ids').map(Number),
         }));
         setPage(1);
@@ -63,8 +85,14 @@ function JobSearchContent() {
         e.preventDefault();
         const params = new URLSearchParams();
         if (keywordInput) params.set('keyword', keywordInput);
-        if (locationInput) params.set('location', locationInput);
+        selectedLocations.forEach((loc) => params.append('locations', loc.name));
         router.push(`/jobs?${params.toString()}`);
+    };
+
+    const applyLocations = (locations: SelectedLocation[]) => {
+        setSelectedLocations(locations);
+        setFilters((f) => ({ ...f, locations: locations.length ? locations.map((l) => l.name) : undefined }));
+        setPage(1);
     };
 
     const toggleSingleFilter = <K extends keyof PublicJobFilterPayload>(key: K, value: PublicJobFilterPayload[K]) => {
@@ -98,14 +126,23 @@ function JobSearchContent() {
                     </div>
                     <div className="hidden w-px bg-slate-200 sm:block" />
                     <div className="flex flex-1 items-center gap-2 px-3">
-                        <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(e) => setLocationInput(e.target.value)}
-                            placeholder="Địa điểm"
-                            className="w-full py-2 text-sm text-slate-700 outline-none"
-                        />
+                        <div className="hidden w-px bg-slate-200 sm:block" />
+                        <button
+                            type="button"
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex flex-1 items-center gap-2 px-3 py-2 text-left"
+                        >
+                            <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                            <span className={`flex-1 text-sm ${selectedLocations.length ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                                {getLocationSummaryLabel(selectedLocations) ?? 'Địa điểm'}
+                            </span>
+                            {selectedLocations.length > 0 && (
+                                <X
+                                    className="h-3.5 w-3.5 shrink-0 text-slate-400 hover:text-slate-600"
+                                    onClick={(e) => { e.stopPropagation(); applyLocations([]); }}
+                                />
+                            )}
+                        </button>
                     </div>
                     <button type="submit" className="shrink-0 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
                         Tìm kiếm
@@ -212,10 +249,23 @@ function JobSearchContent() {
                     </div>
                 </div>
             </div>
+            <LocationPickerModal
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onApply={applyLocations}
+                initialSelected={selectedLocations}
+            />
         </div>
     );
 }
-
+function getLocationSummaryLabel(selected: SelectedLocation[]): string | null {
+    if (selected.length === 0) return null;
+    const groups = new Map<string, number>();
+    selected.forEach((s) => groups.set(s.provinceName, (groups.get(s.provinceName) ?? 0) + 1));
+    const entries = [...groups.entries()];
+    const [firstProvince, count] = entries[0];
+    return entries.length === 1 ? `${firstProvince} (${count})` : `${firstProvince} (${count}) +${entries.length - 1} tỉnh khác`;
+}
 export default function JobSearchPage() {
     return (
         <Suspense fallback={<div className="py-16 text-center text-sm text-slate-400">Đang tải...</div>}>

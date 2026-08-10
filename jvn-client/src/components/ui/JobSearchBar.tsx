@@ -4,17 +4,26 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, Building2, Clock } from 'lucide-react';
 import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
+import LocationPickerModal from '@/features/locations/components/LocationPickerModal';
+import { SelectedLocation } from '@/features/locations/types/vnLocations';
 
 interface JobSearchBarProps {
     initialKeyword?: string;
-    initialLocation?: string;
     variant?: 'hero' | 'compact';
 }
-
-export default function JobSearchBar({ initialKeyword = '', initialLocation = '', variant = 'hero' }: JobSearchBarProps) {
+function getLocationSummaryLabel(selected: SelectedLocation[]): string | null {
+    if (selected.length === 0) return null;
+    const groups = new Map<string, number>();
+    selected.forEach((s) => groups.set(s.provinceName, (groups.get(s.provinceName) ?? 0) + 1));
+    const entries = [...groups.entries()];
+    const [firstProvince, count] = entries[0];
+    return entries.length === 1 ? `${firstProvince} (${count})` : `${firstProvince} (${count}) +${entries.length - 1} tỉnh khác`;
+}
+export default function JobSearchBar({ initialKeyword = '', variant = 'hero' }: JobSearchBarProps) {
     const router = useRouter();
     const [keyword, setKeyword] = useState(initialKeyword);
-    const [location, setLocation] = useState(initialLocation);
+    const [selectedLocations, setSelectedLocations] = useState<SelectedLocation[]>([]);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [debouncedKeyword, setDebouncedKeyword] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -27,6 +36,7 @@ export default function JobSearchBar({ initialKeyword = '', initialLocation = ''
 
     const { data, isFetching } = usePublicJobs({
         keyword: debouncedKeyword || undefined,
+        locations: selectedLocations.length ? selectedLocations.map((l) => l.name) : undefined,
         page: 1,
         page_size: 5,
     });
@@ -47,7 +57,7 @@ export default function JobSearchBar({ initialKeyword = '', initialLocation = ''
         const params = new URLSearchParams();
         const k = kw ?? keyword;
         if (k) params.set('keyword', k);
-        if (location) params.set('location', location);
+        selectedLocations.forEach((loc) => params.append('locations', loc.name));
         setIsOpen(false);
         router.push(`/jobs?${params.toString()}`);
     };
@@ -78,14 +88,17 @@ export default function JobSearchBar({ initialKeyword = '', initialLocation = ''
                 </div>
                 <div className="hidden w-px bg-slate-200 sm:block" />
                 <div className="flex flex-1 items-center gap-2 px-3">
-                    <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Địa điểm"
-                        className={`w-full text-sm text-slate-700 outline-none ${isHero ? 'py-2.5' : 'py-2'}`}
-                    />
+                    <div className="hidden w-px bg-slate-200 sm:block" />
+                    <button
+                        type="button"
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="flex flex-1 items-center gap-2 px-3 text-left"
+                    >
+                        <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                        <span className={`w-full text-sm ${isHero ? 'py-2.5' : 'py-2'} ${selectedLocations.length ? 'text-slate-700' : 'text-slate-400'}`}>
+                            {getLocationSummaryLabel(selectedLocations) ?? 'Địa điểm'}
+                        </span>
+                    </button>
                 </div>
                 <button
                     type="submit"
@@ -150,6 +163,12 @@ export default function JobSearchBar({ initialKeyword = '', initialLocation = ''
                     )}
                 </div>
             )}
+            <LocationPickerModal
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onApply={setSelectedLocations}
+                initialSelected={selectedLocations}
+            />
         </div>
     );
 }

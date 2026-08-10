@@ -42,9 +42,9 @@ axiosClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                await axiosClient.post('/auth/refresh');   // Route Handler sẽ viết sau
+                await axiosClient.post('/auth/refresh');
                 processQueue(null);
-                return axiosClient(originalRequest);   // gọi lại request cũ
+                return axiosClient(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError);
 

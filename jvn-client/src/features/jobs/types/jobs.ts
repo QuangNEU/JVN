@@ -23,7 +23,7 @@ export type JobStatusType = typeof JOB_STATUS[keyof typeof JOB_STATUS];
 
 export interface PublicJobFilterPayload {
     keyword?: string;
-    location?: string;
+    locations?: string[];
     salary_min?: number;
     salary_max?: number;
     level?: JobLevelType;

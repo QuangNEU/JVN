@@ -65,7 +65,7 @@ export default function JobPostFormFields({
     // nếu initialValues đến muộn hơn (vd đang fetch job detail), đồng bộ lại form khi có data
     useEffect(() => {
         if (initialValues) setForm(initialValues);
-    }, [initialValues]);
+    }, [JSON.stringify(initialValues)]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -96,7 +96,7 @@ export default function JobPostFormFields({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isSubmitting) return; // chặn double submit
+        if (isSubmitting) return;
         setError('');
 
         if (!form.is_negotiable && form.salary_min && form.salary_max && form.salary_min > form.salary_max) {

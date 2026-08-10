@@ -7,10 +7,14 @@ import { Plus, Pencil, Trash2, Eye, Search } from 'lucide-react';
 import { useCompanyJobs, useDeleteJobPost } from '@/features/jobs/hooks/useCompanyJobs';
 import { JobPostListParams, JobPost, JobStatusType } from '@/features/jobs/types/jobs';
 import JobPostFormModal from '@/components/ui/JobPostFormModal';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 const statusConfig: Record<string, { label: string; className: string }> = {
     PUBLISHED: { label: 'Đang tuyển', className: 'bg-emerald-50 text-emerald-700' },
     CLOSED: { label: 'Đã đóng', className: 'bg-slate-100 text-slate-500' },
 };
+
+const PAGE_SIZE = 10;
 
 const typeLabels: Record<string, string> = {
     FULLTIME: 'Toàn thời gian',
@@ -49,7 +53,7 @@ const statusTabs: { label: string; value: JobStatusType | undefined }[] = [
 ];
 
 export default function CompanyJobsPage() {
-    const [filters, setFilters] = useState<JobPostListParams>({ page: 1 });
+    const [filters, setFilters] = useState<JobPostListParams>({ page: 1, page_size: PAGE_SIZE });
     const [keywordInput, setKeywordInput] = useState('');
     const [showModal, setShowModal] = useState(false)
     const { data, isLoading, isError } = useCompanyJobs(filters);
@@ -69,6 +73,8 @@ export default function CompanyJobsPage() {
     const jobs = data?.results || [];
     const totalCount = data?.count || 0;
 
+    const currentPage = filters.page ?? 1;
+    const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
     return (
         <div>
@@ -200,6 +206,25 @@ export default function CompanyJobsPage() {
                             })}
                         </tbody>
                     </table>
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 border-t border-slate-100 px-6 py-4">
+                            <button
+                                onClick={() => setFilters((f) => ({ ...f, page: Math.max(1, currentPage - 1) }))}
+                                disabled={currentPage === 1}
+                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <span className="text-sm text-slate-600">Trang {currentPage} / {totalPages}</span>
+                            <button
+                                onClick={() => setFilters((f) => ({ ...f, page: Math.min(totalPages, currentPage + 1) }))}
+                                disabled={currentPage === totalPages}
+                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
