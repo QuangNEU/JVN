@@ -31,3 +31,18 @@ def get_follow_company_selector(*, user:Account):
     have_role(user=user, role='jobseeker')
     followed_company = Follow.objects.filter(job_seeker= user.jobseeker).select_related('company', 'company__account').order_by('-created_at')
     return followed_company
+
+def get_company_verification_level(*, company: Company) -> int:
+    if not company.account.email_verified:
+        return 0
+    if company.business_cert_status == Company.CertStatus.APPROVED:
+        return 2
+    return 1
+
+def get_business_cert_list_selector(*,user:Account, status_filter):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        return PermissionError({'error':'You dont have the permission to read business cert'})
+    quert_set = Company.objects.select_related('account')
+    if status_filter:
+        quert_set = quert_set.filter(business_cert_status = status_filter)
+    return quert_set.exclude(business_cert_status=Company.CertStatus.NOT_SUBMITTED)

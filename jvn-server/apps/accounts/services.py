@@ -1,5 +1,10 @@
+import os
+import uuid
 from django.db import transaction,IntegrityError
 from .models import Account,JobSeeker,Company,Follow
+from .tasks import send_verification_email_task
+from core.permission import have_role
+from core.validator import validate_file
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
@@ -10,15 +15,17 @@ from google.oauth2 import id_token
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes,force_str
-import os
-import uuid
+from django.utils import timezone
+from django.conf import settings
+from django.core.signing import TimestampSigner,BadSignature, SignatureExpired
+
 
 ALLOWED_SEEKER_FIELDS = ['github_urls']
 ALLOWED_COMPANY_FIELDS = ['name', 'description', 'headcount', 'province', 'ward', 'exact_address',
             'logo', 'website', 'founded_date', 'tax_code', 'industry', 'followers_count',]
 
 
-def create_user_service(*,email,password,role,name,tel = None,province = None,ward = None):
+def create_user_service(*,email,password,role,name,tel = None,province = None,ward = None, send_verification = True):
     try:
         with transaction.atomic():
             account = Account.objects.create_user(
@@ -34,7 +41,11 @@ def create_user_service(*,email,password,role,name,tel = None,province = None,wa
             elif role == Account.ROLE_CHOICES.COMPANY:
                 Company.objects.create(account = account,province = province,ward = ward)     
             else:
-                raise ValueError(f"Role khong hop le:{role}")    
+                raise ValueError(f"Role khong hop le:{role}")  
+
+            if send_verification:
+                transaction.on_commit(lambda: send_email_verification_service(user=account))  
+
             return account       
     except  IntegrityError:
         raise ValueError('Email da ton tai')
@@ -109,6 +120,7 @@ def google_login_service(*, google_token:str,role:str):
 
     email = id_info.get('email')
     name = id_info.get('name')
+    google_email_verified = id_info.get('email_verified', False)
 
     if not email:
         raise ValidationError('Khong lay duoc email tu tai khoan google nay')
@@ -133,16 +145,24 @@ def google_login_service(*, google_token:str,role:str):
             role=role,
             name=name,
             province=default_province,
-            ward=default_ward
+            ward=default_ward,
+            send_verification=False
         )
 
         user.set_unusable_password()
-        user.save(update_fields=['password'])
+        if google_email_verified:                        
+            user.email_verified = True
+            user.save(update_fields=['password', 'email_verified'])
+        else:
+            user.save(update_fields=['password'])
     else:
         if not user.is_active:
             raise ValidationError('Tai khoan nay da bi khoa')
         if role and user.role != role:
             raise ValidationError('Tai khoan nay da duoc dung cho vai tro khac')   
+        if google_email_verified and not user.email_verified:   
+            user.email_verified = True
+            user.save(update_fields=['email_verified'])
     refresh =RefreshToken.for_user(user)
     return{
         'refresh':str(refresh),
@@ -203,3 +223,69 @@ def follow_service(*,user : Account,company_id:int):
         'is_following':is_following,
         'message':message
     }
+
+signer = TimestampSigner(salt='email-vertification')
+EMAIL_TOKEN_MAX_AGE = 60*60*0.5
+
+def generate_email_verification_token(*, account_id: int) -> str:
+    return signer.sign(str(account_id))
+
+def verify_email_verification_token(*, token: str)->int:
+    try:
+        value = signer.unsign(token, max_age= EMAIL_TOKEN_MAX_AGE)
+        return int(value)
+    except (BadSignature, SignatureExpired):
+        raise ValidationError(
+            {'error':'Vertification link was expired or invalid'}
+        )
+    
+@transaction.atomic
+def send_email_verification_service(*, user: Account):
+    token = generate_email_verification_token(account_id=user.id)
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    transaction.on_commit(lambda: send_verification_email_task.delay(user.email, user.name, verify_url))
+    return {'message':'The link have been sent, please check your mail!'}
+
+@transaction.atomic
+def confirm_email_vertification_service(*, token):
+    account_id = verify_email_verification_token(token= token)
+    account = get_object_or_404(Account, pk= account_id)
+    if account.email_verified:
+        return account
+    account.email_verified = True
+    account.save(update_fields=['email_verified'])
+    return {'message':'Verify successfully'}
+
+@transaction.atomic
+def submit_business_certificate(*, user:Account, document):
+    have_role(user=user, role='company')
+    validate_file(file_obj=document)
+    company = user.company
+    if company.business_cert_status == Company.CertStatus.APPROVED:
+        raise ValidationError({'error': 'You have submit your bussiness certificate'})
+    company.business_cert_document = document
+    company.business_cert_status = Company.CertStatus.PENDING
+    company.business_cert_rejected_reason = None
+    company.save(updated_fields = ['business_cert_document', 'business_cert_status', 'business_cert_rejected_reason'])
+    return company
+
+def approve_business_certificate(*, user: Account, company_id: int):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionError({'error': 'You dont have the permission to approve the certificate'})  
+    company = get_object_or_404(Company, pk = company_id)
+    company.business_cert_status = Company.CertStatus.APPROVED
+    company.business_cert_reviewed_at = timezone.now()
+    company.save(update_fields=['business_cert_status', 'business_cert_reviewed_at'])
+    return company
+
+def reject_business_certificate(*, user: Account, company_id, reason):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionError({'error':'You dont have the permission to reject the certificate'})
+    company = get_object_or_404(Company, pk = company_id)
+    company.business_cert_status = company.CertStatus.REJECTED
+    company.business_cert_reviewed_at = timezone.now()
+    company.business_cert_rejected_reason = reason
+    company.save(update_fields=['business_cert_status', 'business_cert_reviewed_at', 'business_cert_rejected_reason'])
+    return company
+
+    

@@ -21,7 +21,7 @@ def validate_strong_password(value):
         raise serializers.ValidationError(list(e.messages))
     return value
 
-def validate_cv_file(file_obj):
+def validate_file(file_obj):
     """
     Hàm kiểm tra tính hợp lệ của file upload (CV/Ảnh).
     """

@@ -181,3 +181,5 @@ MEDIA_URL = '/JVN/'
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 # CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
 CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'
+
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')

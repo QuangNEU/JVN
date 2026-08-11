@@ -145,3 +145,19 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ['id', 'company', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+class CompanyCertReviewSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source = 'account_id', read_only = True)
+    company_name = serializers.CharField(source= 'account.name', read_only = True)
+    document_url = serializers.SerializerMethodField()
+    class Meta:
+        model = Company
+        fields = ['id', 'company_name', 'tax_code', 'document_url', 'business_cert_status', 'business_cert_reviewed_at', 'business_cert_rejected_reason']
+        read_only_fields = ['tax_code', 'business_cert_reviewed_at']
+
+    def get_document_url(self, obj):
+        return obj.business_cert_document.url if obj.business_cert_document else None
+    
+class SubmitCertSerializer(serializers.Serializer):
+    document = serializers.FileField()
+

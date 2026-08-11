@@ -71,7 +71,7 @@ class PublicJobPostView(APIView):
         category_ids = [int(cid) for cid in category_ids_raw if cid.isdigit()]
         filters = {
             'keyword': request.query_params.get('keyword'),
-            'location': request.query_params.get('location'),
+            'locations': request.query_params.get('locations'),
             'salary_min': request.query_params.get('salary_min'),
             'salary_max': request.query_params.get('salary_max'),
             'level': request.query_params.get('level'),

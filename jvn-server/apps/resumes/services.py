@@ -5,7 +5,7 @@ from accounts.models import Account
 from rest_framework.exceptions import ValidationError,PermissionDenied
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
-from core.validator import validate_cv_file
+from core.validator import validate_file
 
 @transaction.atomic
 def create_cv_service(*,user:Account, data:dict):
@@ -13,7 +13,7 @@ def create_cv_service(*,user:Account, data:dict):
         raise ValidationError({'detail':'Chi ung vien moi co the tai len CV'})
     file_obj = data.get('file')
     if file_obj:
-        validate_cv_file(file_obj)
+        validate_file(file_obj)
     job_seeker = user.jobseeker
     cv = CV.objects.create(
         job_seeker = job_seeker,
@@ -65,7 +65,7 @@ def update_cv_service(*,user:Account,data:dict,cv_id:int):
     if 'file' in data:
         new_file = data.pop('file')
         if new_file:
-            validate_cv_file(new_file)
+            validate_file(new_file)
             
         if cv.file:
             try:

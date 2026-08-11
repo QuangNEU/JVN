@@ -34,6 +34,8 @@ class Account(AbstractUser):
     role = models.CharField(max_length=20,choices=ROLE_CHOICES)
     tel = models.CharField(max_length = 15,null=True, blank=True)
     name = models.CharField(max_length= 255)
+    email_verified = models.BooleanField(default=False)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -49,6 +51,11 @@ class JobSeeker(models.Model):
         return self.account.name
     
 class Company(models.Model):
+    class CertStatus(models.TextChoices):
+        NOT_SUBMITTED = 'NOT_SUBMITTED', 'Chưa nộp'
+        PENDING = 'PENDING', 'Đang chờ duyệt'
+        APPROVED = 'APPROVED', 'Đã duyệt'
+        REJECTED = 'REJECTED', 'Bị từ chối'
     account = models.OneToOneField(Account, on_delete=models.CASCADE, primary_key=True)
     description = models.TextField(blank=True, null=True)
     headcount = models.CharField(max_length=20, choices=HEADCOUNT_CHOICES, blank=True, null=True)
@@ -60,6 +67,10 @@ class Company(models.Model):
     founded_date = models.DateField(null=True, blank=True)
     tax_code = models.CharField(max_length=20, blank=True, null=True)
     industry = models.CharField(max_length=100, blank=True, null=True)
+    business_cert_document = models.FileField(upload_to='business_certs/', null=True, blank=True)
+    business_cert_status = models.CharField(max_length=20, choices=CertStatus.choices, default=CertStatus.NOT_SUBMITTED)
+    business_cert_rejected_reason = models.CharField(max_length=255, null=True, blank=True)
+    business_cert_reviewed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.account.name

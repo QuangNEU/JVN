@@ -8,10 +8,17 @@ from resumes.models import Tag
 from rest_framework.serializers import ValidationError
 from django.utils import timezone
 from . selectors import get_valid_leaf_categories
+from accounts.selectors import get_company_verification_level
 
 @transaction.atomic
 def create_category_service(*, user: Account, data: dict):
     have_role(user=user, role='company')
+    company = user.company
+    if get_company_verification_level(company=company) < 2:
+        raise PermissionDenied({
+            'error': 'Please verify your email and business certificate for creating category' 
+        })
+
     parent = None
     parent_id = data.get('parent_id')
 
@@ -57,6 +64,10 @@ def approve_category_service(*,user: Account,category_id:int):
 def create_post_service(*, user: Account, data: dict):
     have_role(user=user, role='company')
     company = user.company
+    if get_company_verification_level(company=company) < 2:
+        raise PermissionDenied({
+            'error': 'Please verify your email and business certificate for creating job post' 
+        })
     tag_ids = data.pop('tag_ids', [])
     category_ids = data.pop('category_ids', [])
 

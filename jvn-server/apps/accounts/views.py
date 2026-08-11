@@ -2,13 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.pagnigation import StandardResultsPagination
 from .throttles import LoginRateThrottle
-from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer
-from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout
-from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector
+from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
+from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout, send_email_verification_service, confirm_email_vertification_service, submit_business_certificate, approve_business_certificate, reject_business_certificate
+from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector
 
 # Create your views here.
 class RegisterView(APIView):
@@ -149,3 +150,60 @@ class MyFollowView(APIView):
         page = paginator.paginate_queryset(followed_company, request)
         serializer = FollowSerializer(page, many = True)
         return paginator.get_paginated_response(serializer.data)
+    
+class SendEmailVerificationView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        result = send_email_verification_service(user= request.user)
+        return Response(result, status= status.HTTP_200_OK)
+    
+class ConfirmEmailVerificationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self,request):
+        token = request.data.get('token')
+        if not token:
+            return Response({"error":"Verify token is missing"})
+        result = confirm_email_vertification_service(token=token)
+        return Response(result, status=status.HTTP_200_OK)
+
+class SubmitBusinessCertificationView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    def post(self, request):
+        serializer = SubmitCertSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data()
+        result = submit_business_certificate(user= request.user, document=data.get('document'))
+        return Response(result, status=status.HTTP_200_OK)
+    
+class BusinessCertListView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self, request):
+        status_filter = request.query_params.get('status')
+        companies = get_business_cert_list_selector(user= request.user, status_filter=status_filter)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(companies, request)
+        serializer = CompanyCertReviewSerializer(page, many = True)
+        return paginator.get_paginated_response(serializer.data)
+    
+class  ApproveCertView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self, request, company_id):
+        company = approve_business_certificate(user= request.user, company_id=company_id)
+        return Response({
+            'message': 'Đã duyệt giấy chứng nhận',
+            'business_cert_status': company.business_cert_status,
+        }, status=status.HTTP_200_OK)
+    
+class RejectBusinessCertView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, company_id):
+        reason = request.data.get('reason', '')
+        company = reject_business_certificate(user=request.user, company_id=company_id, reason=reason)
+        return Response({
+            'message': 'Đã từ chối giấy chứng nhận',
+            'business_cert_status': company.business_cert_status,
+        }, status=status.HTTP_200_OK)

@@ -74,11 +74,11 @@ def public_read_post_service(*, filters: dict = None):
             Q(company__account__name__icontains=keyword)
         )
 
-    location = filters.get('location')
-    if location:
+    locations = filters.get('locations')
+    if locations:
         queryset = queryset.filter(
-            Q(company__province__icontains=location) |
-            Q(company__ward__icontains=location)
+            Q(company__province__icontains=locations) |
+            Q(company__ward__icontains=locations)
         )
 
     salary_min = filters.get('salary_min')
