@@ -108,7 +108,7 @@ class AccountDetailSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
     class Meta:
         model = Account
-        fields = ['id','email','name','tel','profile']
+        fields = ['id','email','name','tel','profile', 'role']
 
     def get_profile(self,obj):
         if obj.role == 'SEEKER':

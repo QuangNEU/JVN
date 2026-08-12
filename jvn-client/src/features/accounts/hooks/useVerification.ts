@@ -1,5 +1,6 @@
 import { confirmEmailVerification } from "../services/verificationService";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from "@/store/useAuthStore";
 import {
     getMyVerificationStatus, sendEmailVerification, submitBusinessCert,
     getBusinessCertList, approveBusinessCert, rejectBusinessCert,
@@ -10,9 +11,11 @@ export function useConfirmEmailVerification() {
 }
 
 export function useMyVerificationStatus() {
+    const user = useAuthStore((s) => s.user);
     return useQuery({
-        queryKey: ['my-verification-status'],
+        queryKey: ['my-verification-status', user?.id],
         queryFn: getMyVerificationStatus,
+        enabled: !!user,
     });
 }
 

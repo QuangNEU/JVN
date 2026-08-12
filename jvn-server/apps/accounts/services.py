@@ -269,7 +269,7 @@ def submit_business_certificate(*, user:Account, document):
     company.business_cert_document = document
     company.business_cert_status = Company.CertStatus.PENDING
     company.business_cert_rejected_reason = None
-    company.save(updated_fields = ['business_cert_document', 'business_cert_status', 'business_cert_rejected_reason'])
+    company.save(update_fields = ['business_cert_document', 'business_cert_status', 'business_cert_rejected_reason'])
     return company
 
 def approve_business_certificate(*, user: Account, company_id: int):

@@ -6,15 +6,21 @@ import { Menu, Bell, Plus, ChevronDown, LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CompanyTopBar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     const { user, logout } = useAuthStore();
     const [menuOpen, setMenuOpen] = useState(false);
     const router = useRouter();
-
+    const queryClient = useQueryClient()
     const handleLogout = async () => {
-        await logout();
-        router.push('/');
+        try {
+            await logout();
+        }
+        finally {
+            queryClient.clear();
+            router.push('/');
+        }
     };
 
     return (

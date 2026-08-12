@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Account } from '@/features/accounts/types/account';
 import axiosClient from '@/services/axios';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthState {
     user: Account | null;
@@ -17,7 +18,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     accessToken: null,
     isAuthenticated: false,
     isLoading: true,
-
     setAuth: (user,) =>
         set({ user, isAuthenticated: true, isLoading: false }),
 

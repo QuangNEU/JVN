@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ListChecks, FileCheck2 } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, ListChecks, FileCheck2, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const navItems = [
     { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
@@ -12,13 +13,21 @@ const navItems = [
 
 export default function AdminSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const logout = useAuthStore((s) => s.logout);
+
+    const handleLogout = async () => {
+        await logout();
+        router.push('/login');
+    };
 
     return (
-        <aside className="w-64 shrink-0 border-r border-slate-100 bg-white">
+        <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-slate-100 bg-white">
             <div className="border-b border-slate-100 px-6 py-5">
                 <p className="text-sm font-bold text-slate-800">JVN Admin</p>
             </div>
-            <nav className="space-y-1 p-4">
+
+            <nav className="flex-1 space-y-1 p-4">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                     return (
@@ -33,6 +42,16 @@ export default function AdminSidebar() {
                     );
                 })}
             </nav>
+
+            <div className="border-t border-slate-100 p-4">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                >
+                    <LogOut className="h-5 w-5" />
+                    Đăng xuất
+                </button>
+            </div>
         </aside>
     );
 }

@@ -172,9 +172,12 @@ class SubmitBusinessCertificationView(APIView):
     def post(self, request):
         serializer = SubmitCertSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data()
+        data = serializer.validated_data
         result = submit_business_certificate(user= request.user, document=data.get('document'))
-        return Response(result, status=status.HTTP_200_OK)
+        return Response({
+            'message': 'Đã nộp giấy chứng nhận, vui lòng chờ Admin duyệt.',
+            'business_cert_status': result.business_cert_status,
+        }, status=status.HTTP_200_OK)
     
 class BusinessCertListView(APIView):
     permission_classes=[IsAuthenticated]

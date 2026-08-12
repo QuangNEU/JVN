@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, User, Send, Heart, Building2, LogOut, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 const navItems = [
     {
@@ -31,7 +32,7 @@ export default function TopNavBar() {
 
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
-
+    const queryClient = useQueryClient()
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -51,9 +52,15 @@ export default function TopNavBar() {
     };
 
     const handleLogout = async () => {
-        await logout();
-        setUserMenuOpen(false);
-        router.push('/login');
+        try {
+            await logout();
+        }
+
+        finally {
+            setUserMenuOpen(false);
+            queryClient.clear()
+            router.push('/login');
+        }
     };
 
     // Tìm dữ liệu dropdown đang được active
