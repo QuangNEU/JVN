@@ -16,6 +16,7 @@ import dotenv
 from datetime import timedelta
 
 
+
 dotenv.load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -30,7 +31,19 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CORS_ALLOWED_ORIGINS = [
+    "http://jvn.com:3000",
+    "http://tuyendung.jvn.com:3000",
+    "http://admin.jvn.com:3000",   
+]
+
+ALLOWED_HOSTS = [
+    "jvn.com",
+    "tuyendung.jvn.com",
+    "admin.jvn.com",   
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -182,4 +195,5 @@ CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 # CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
 CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'
 
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+SEEKER_FRONTEND_URL = os.environ.get('SEEKER_FRONTEND_URL', 'http://jvn.com')
+EMPLOYER_FRONTEND_URL = os.environ.get('EMPLOYER_FRONTEND_URL', 'http://tuyendung.jvn.com')

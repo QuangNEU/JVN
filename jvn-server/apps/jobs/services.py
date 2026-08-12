@@ -16,7 +16,7 @@ def create_category_service(*, user: Account, data: dict):
     company = user.company
     if get_company_verification_level(company=company) < 2:
         raise PermissionDenied({
-            'error': 'Please verify your email and business certificate for creating category' 
+            'detail': 'Please verify your email and business certificate for creating category' 
         })
 
     parent = None
@@ -66,7 +66,7 @@ def create_post_service(*, user: Account, data: dict):
     company = user.company
     if get_company_verification_level(company=company) < 2:
         raise PermissionDenied({
-            'error': 'Please verify your email and business certificate for creating job post' 
+            'detail': 'Please verify your email and business certificate for creating job post' 
         })
     tag_ids = data.pop('tag_ids', [])
     category_ids = data.pop('category_ids', [])
@@ -80,7 +80,7 @@ def create_post_service(*, user: Account, data: dict):
     if tag_ids:
         tags = Tag.objects.filter(id__in=tag_ids)
         if tags.count() != len(set(tag_ids)):
-            raise ValidationError({'error': 'Some tags is not exists'})
+            raise ValidationError({'detail': 'Some tags is not exists'})
         job_post.tags.set(tags)
 
     if category_ids:

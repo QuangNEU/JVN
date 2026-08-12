@@ -3,6 +3,7 @@ import { AUTH_KEYS } from '@/constants/auth';
 
 const protectedRoutes = ['/cvs', '/profile', '/application'];
 const employerProtectedRoutes = ['/jobs', '/applicants', '/dashboard'];
+const ADMIN_PUBLIC_ROUTES = ['/login'];
 const SHARED_ROUTES = ['/forgot-password', '/reset-password'];
 
 export function proxy(request: NextRequest) {
@@ -14,19 +15,30 @@ export function proxy(request: NextRequest) {
     const userRole = request.cookies.get(AUTH_KEYS.USER_ROLE)?.value;
 
     const isEmployerDomain = hostname.startsWith('tuyendung.');
+    const isAdminDomain = hostname.startsWith('admin.');
 
     if (SHARED_ROUTES.some((r) => pathname.startsWith(r))) {
         url.pathname = `/seeker-app${pathname}`;
         return NextResponse.rewrite(url);
     }
 
-    if (isEmployerDomain) {
+    if (isAdminDomain) {
+        url.pathname = `/admin-app${pathname}`;
+    } else if (isEmployerDomain) {
         url.pathname = `/employer-app${pathname}`;
     } else {
         url.pathname = `/seeker-app${pathname}`;
     }
 
-    if (isEmployerDomain) {
+    if (isAdminDomain) {
+        const isPublicAdminRoute = ADMIN_PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+        if (!isPublicAdminRoute && !accessToken) {
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
+        if (!isPublicAdminRoute && userRole !== 'ADMIN') {
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
+    } else if (isEmployerDomain) {
         const needsAuth = employerProtectedRoutes.some((r) => pathname.startsWith(r));
         if (needsAuth && !accessToken) {
             return NextResponse.redirect(new URL('/login', request.url));

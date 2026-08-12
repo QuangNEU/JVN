@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import axiosClient from '@/services/axios';
+import { useConfirmEmailVerification } from '../hooks/useVerification';
 
 type Status = 'loading' | 'success' | 'error';
+
 
 export default function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
     const [status, setStatus] = useState<Status>('loading');
     const [message, setMessage] = useState('');
+    const confirmMutation = useConfirmEmailVerification();
 
     useEffect(() => {
         if (!token) {
@@ -20,15 +22,17 @@ export default function VerifyEmailContent() {
             setMessage('Thiếu token xác thực trong đường link.');
             return;
         }
-        axiosClient.post('/accounts/email/confirm/', { token })
-            .then((res) => {
+        confirmMutation.mutate(token, {
+            onSuccess: (data) => {
                 setStatus('success');
-                setMessage(res.data.message || 'Xác thực email thành công.');
-            })
-            .catch((err) => {
+                setMessage(data.message || 'Xác thực email thành công.');
+            },
+            onError: (err: any) => {
                 setStatus('error');
                 setMessage(err.response?.data?.error || 'Link xác thực không hợp lệ hoặc đã hết hạn.');
-            });
+            },
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     return (

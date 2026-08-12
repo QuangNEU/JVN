@@ -43,8 +43,8 @@ def create_user_service(*,email,password,role,name,tel = None,province = None,wa
             else:
                 raise ValueError(f"Role khong hop le:{role}")  
 
-            if send_verification:
-                transaction.on_commit(lambda: send_email_verification_service(user=account))  
+            # if send_verification:
+            #     transaction.on_commit(lambda: send_email_verification_service(user=account))  
 
             return account       
     except  IntegrityError:
@@ -224,7 +224,7 @@ def follow_service(*,user : Account,company_id:int):
         'message':message
     }
 
-signer = TimestampSigner(salt='email-vertification')
+signer = TimestampSigner(salt='email-verification')
 EMAIL_TOKEN_MAX_AGE = 60*60*0.5
 
 def generate_email_verification_token(*, account_id: int) -> str:
@@ -241,17 +241,20 @@ def verify_email_verification_token(*, token: str)->int:
     
 @transaction.atomic
 def send_email_verification_service(*, user: Account):
-    token = generate_email_verification_token(account_id=user.id)
-    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    if user.email_verified:
+        raise ValidationError({'error': 'Email đã được xác thực trước đó'})
+    base_url = settings.EMPLOYER_FRONTEND_URL if user.role == Account.ROLE_CHOICES.COMPANY else settings.SEEKER_FRONTEND_URL
+    token = signer.sign(str(user.id))
+    verify_url = f"{base_url}/verify-email?token={token}"
     transaction.on_commit(lambda: send_verification_email_task.delay(user.email, user.name, verify_url))
-    return {'message':'The link have been sent, please check your mail!'}
+    return {'message': f'Đã gửi email xác thực tới {user.email}'}
 
 @transaction.atomic
-def confirm_email_vertification_service(*, token):
+def confirm_email_verification_service(*, token):
     account_id = verify_email_verification_token(token= token)
     account = get_object_or_404(Account, pk= account_id)
     if account.email_verified:
-        return account
+        return {'message':'Account has been verified'}
     account.email_verified = True
     account.save(update_fields=['email_verified'])
     return {'message':'Verify successfully'}

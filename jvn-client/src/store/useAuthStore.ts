@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { Account } from '@/features/accounts/types/account'; // Giả sử bạn đã có type User
-import axios from 'axios';
+import { Account } from '@/features/accounts/types/account';
 import axiosClient from '@/services/axios';
 
 interface AuthState {
