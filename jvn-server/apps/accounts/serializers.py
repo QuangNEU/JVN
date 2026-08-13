@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password as django_validate_password
 from django.core.exceptions import ValidationError
-from core.validator import validate_strong_password,validate_tel
+from core.validator import validate_strong_password,validate_tel, validate_html_tag
 from .models import Account, JobSeeker, Company, Follow
 from core.constants import HEADCOUNT_CHOICES
 
@@ -13,10 +13,10 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only = True,min_length = 6,validators =[validate_strong_password])
     role = serializers.ChoiceField(choices=PUBLIC_ROLE_CHOICES)
-    name = serializers.CharField(max_length = 255)
-    province = serializers.CharField(max_length = 100,required = False, allow_blank = True)
-    ward = serializers.CharField(max_length = 255,required = False,allow_blank = True)
-    tel = serializers.CharField(max_length =15,required = False, allow_blank = True,validators = [validate_tel])
+    name = serializers.CharField(max_length = 255, validators = [validate_html_tag])
+    province = serializers.CharField(max_length = 100,required = False, allow_blank = True, validators = [validate_html_tag])
+    ward = serializers.CharField(max_length = 255,required = False,allow_blank = True, validators = [validate_html_tag])
+    tel = serializers.CharField(max_length =15,required = False, allow_blank = True,validators = [validate_tel, validate_html_tag])
     def validate_email(self, value):
         if Account.objects.filter(email = value).exists():
             raise serializers.ValidationError("Email nay da ton tai")

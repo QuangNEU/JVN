@@ -20,6 +20,13 @@ def validate_strong_password(value):
     except DjangoValidationError as e:
         raise serializers.ValidationError(list(e.messages))
     return value
+def validate_html_tag(value):
+    html_pattern = re.compile(r'<[^>]+>')
+    
+    if html_pattern.search(value):
+        raise ValidationError("Dữ liệu không hợp lệ. Vui lòng không nhập các thẻ HTML.")
+    
+    return value
 
 def validate_file(file_obj):
     """
