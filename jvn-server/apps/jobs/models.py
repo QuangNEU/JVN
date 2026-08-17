@@ -10,8 +10,9 @@ class Category(models.Model):
     title = models.CharField(max_length=255)
     status = models.CharField(max_length=50,choices=Status.choices,default='PENDING')
     created_by = models.ForeignKey(Account, on_delete=models.SET_NULL,null=True,related_name='created_category')
+    rejected_reason = models.TextField(null=True, blank=True)
     parent = models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True,related_name='children')
-    created_at =models.DateTimeField(auto_now=True)
+    created_at =models.DateTimeField(auto_now_add=True)
     updated_at =models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title

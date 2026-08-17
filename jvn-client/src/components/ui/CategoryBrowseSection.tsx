@@ -3,13 +3,13 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ChevronRight, ChevronLeft, Sparkles, LayoutGrid, Search } from 'lucide-react';
-import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
+import { useGetApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { Category } from '@/features/jobs/types/jobs';
 
 const ITEMS_PER_PAGE = 4;
 
 export default function CategoryBrowseSection() {
-    const { data: categories, isLoading } = useApprovedCategories();
+    const { data: categories, isLoading } = useGetApprovedCategories();
     const hasCategories = categories && categories.length > 0;
     const [hovered, setHovered] = useState<Category | null>(null);
     const [page, setPage] = useState(1);

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, MapPin, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
-import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
+import { useGetApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { PublicJobFilterPayload, JobLevelType, JobTypeType } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
 import CategoryCheckboxTree from '@/features/jobs/components/CategoryCheckboxTree';
@@ -74,7 +74,7 @@ function JobSearchContent() {
         setPage(1);
     }, [searchParams]);
 
-    const { data: categories } = useApprovedCategories();
+    const { data: categories } = useGetApprovedCategories();
     const { data, isLoading, isError } = usePublicJobs({ ...filters, page, page_size: PAGE_SIZE });
 
     const jobs = data?.results ?? [];

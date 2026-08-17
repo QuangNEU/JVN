@@ -1,4 +1,5 @@
 from rest_framework.exceptions import PermissionDenied
+from accounts.models import Account
 
 def get_owned_or_403(*, user, profile_attr: str, obj, owner_field: str):
     if not hasattr(user, profile_attr):
@@ -15,7 +16,7 @@ def get_owned_or_403(*, user, profile_attr: str, obj, owner_field: str):
     
     return obj
 
-def have_role(*,user,role:str):
-    if not hasattr(user, role):
+def have_role(*,user: Account,role:str):
+    if not (hasattr(user, role) or (user.role == role)):
         raise PermissionDenied({'detail': 'Khong co quyen han'})
     return True

@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Briefcase, Users, Building2 } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, Building2, Tags } from 'lucide-react';
 
 const navItems = [
     { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Tin tuyển dụng', href: '/jobs', icon: Briefcase },
     { label: 'Ứng viên', href: '/applicants', icon: Users },
     { label: 'Hồ sơ công ty', href: '/profile', icon: Building2 },
+    { label: 'Đề xuất danh mục', href: '/category', icon: Tags },
 ];
 
 export default function CompanySidebar({
@@ -35,8 +36,8 @@ export default function CompanySidebar({
                                 href={item.href}
                                 onClick={onClose}
                                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-amber-50 text-amber-700'
-                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                                    ? 'bg-amber-50 text-amber-700'
+                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
                                     }`}
                             >
                                 <item.icon className="h-[18px] w-[18px]" />

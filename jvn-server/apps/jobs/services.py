@@ -12,12 +12,15 @@ from accounts.selectors import get_company_verification_level
 
 @transaction.atomic
 def create_category_service(*, user: Account, data: dict):
-    have_role(user=user, role='company')
-    company = user.company
-    if get_company_verification_level(company=company) < 2:
-        raise PermissionDenied({
-            'detail': 'Please verify your email and business certificate for creating category' 
-        })
+    if user.role == Account.ROLE_CHOICES.COMPANY:
+        company = user.company
+        if get_company_verification_level(company=company) < 2:
+            raise PermissionDenied({'detail': '...'})
+        status = Category.Status.PENDING
+    elif user.role == Account.ROLE_CHOICES.ADMIN:
+        status = Category.Status.APPROVED
+    else:
+        raise PermissionDenied({'detail': 'You dont have permission to create category'})
 
     parent = None
     parent_id = data.get('parent_id')
@@ -33,32 +36,41 @@ def create_category_service(*, user: Account, data: dict):
 
     category = Category.objects.create(
         title=data.get('title'),
-        status=Category.Status.PENDING,
+        status=status,
         created_by=user,
         parent=parent
     )
     return category
 
 
-def deny_category_service(*,user:Account,category_id:int):
+def deny_category_service(*,user:Account,category_id:int, reason: str):
     if user.role != Account.ROLE_CHOICES.ADMIN:
         raise PermissionDenied({'detail':'You dont have the permission'})
-    category = get_object_or_404(Category,pk = category_id)
+    category = get_object_or_404(Category,pk = category_id,  status=Category.Status.PENDING)
     category.status = Category.Status.REJECTED
-    category.save(update_fields=['status'])
-    return {
-        'message':'Tu choi thanh cong'
-    }
+    category.rejected_reason = reason
+    category.save(update_fields=['status', 'rejected_reason', 'updated_at'])
+    return category
 
 def approve_category_service(*,user: Account,category_id:int):
     if user.role != Account.ROLE_CHOICES.ADMIN:
         raise PermissionDenied({'detail':'You dont have the permission'})
-    category = get_object_or_404(Category,pk=category_id)
+    category = get_object_or_404(Category,pk=category_id,  status=Category.Status.PENDING)
+    category.rejected_reason = None
     category.status = Category.Status.APPROVED
-    category.save(update_fields=['status'])
-    return{
-        'message':'Da dong y'
-    }
+    category.save(update_fields=['status', 'rejected_reason', 'updated_at'])
+    return category
+
+
+def resubmit_category_service(*, user: Account,category_id:int, data: dict):
+    have_role(user=user, role='company')
+    category = get_object_or_404(Category, pk = category_id, created_by = user, status = Category.Status.REJECTED)
+    category.title = data.get('title')
+    category.parent = data.get('parent')
+    category.status = Category.Status.PENDING
+    category.rejected_reason = None
+    category.save(update_fields=['title', 'parent', 'status', 'rejected_reason'])
+    return category
 
 @transaction.atomic
 def create_post_service(*, user: Account, data: dict):

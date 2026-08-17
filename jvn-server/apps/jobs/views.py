@@ -2,11 +2,12 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
-from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer
+from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer, CategoryReviewSerializer, CompanyCategorySerializer
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
-from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service
-from .selectors import get_pending_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector
+from .models import Category
+from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
+from .selectors import get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
 # Create your views here.
 
 
@@ -17,11 +18,27 @@ class CategoryCreateView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         category = create_category_service(user=request.user,data = data)
+        message = (
+            "Tạo danh mục thành công, vui lòng chờ Admin duyệt."
+            if category.status == Category.Status.PENDING
+            else "Tạo danh mục thành công."
+        )
         return Response({
-            "message": "Tạo danh mục thành công, vui lòng chờ Admin duyệt.",
-            "data": CategorySerializer(category).data
+            "message": message,
+            "data": CompanyCategorySerializer(category).data
         },status=status.HTTP_201_CREATED)
-    
+
+class CategoryGetCompanyListView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        status_query = request.query_params.get('status')
+        category = get_my_category_requests_selector(user= request.user, status_filter= status_query)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(category, request)
+        serialize = CompanyCategorySerializer(page, many = True)
+        return paginator.get_paginated_response(serialize.data)
+
+
 class CategoryGetApprovedView(APIView):
     permission_classes=[AllowAny]
     def get(self,request):
@@ -29,25 +46,43 @@ class CategoryGetApprovedView(APIView):
         serializer = CategorySerializer(categories,many = True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class CategoryGetPendingView(APIView):
+class CategoryGetAdminView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        categories = get_pending_category_service(user=request.user)
-        serializer = CategorySerializer(categories,many =True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        status_query = request.query_params.get('status')
+        categories = get_admin_category_service(user=request.user, status_filter= status_query)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(categories,request)
+        serializer = CompanyCategorySerializer(page,many =True)
+        return paginator.get_paginated_response(serializer.data)
     
 class DenyCategoryView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self,request,category_id):
-        message = deny_category_service(user=request.user,category_id=category_id)
-        return Response(message,status=status.HTTP_200_OK)
+        data = CategoryReviewSerializer(data = request.data)
+        data.is_valid(raise_exception=True)
+        data = data.validated_data
+        category = deny_category_service(user=request.user,category_id=category_id, reason= data.get('rejected_reason'))
+        serializer = CompanyCategorySerializer(category)
+        return Response(serializer.data,status=status.HTTP_200_OK)
     
 class ApproveCategoryView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self,request,category_id):
-        message = approve_category_service(user=request.user,category_id=category_id)
-        return Response(message,status=status.HTTP_200_OK)
-    
+        approved_category = approve_category_service(user=request.user,category_id=category_id)
+        serializer = CompanyCategorySerializer(approved_category) 
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+class ResubmitCategoryView(APIView):
+    permission_classes = [IsAuthenticated]
+    def patch(self, request, category_id):
+        data = CategoryCreateSerializer(data = request.data)
+        data.is_valid(raise_exception=True)
+        data = data.validated_data
+        category = resubmit_category_service(user= request.user, category_id=category_id, data=data)
+        serialize = CompanyCategorySerializer(category)
+        return Response(serialize.data, status=status.HTTP_200_OK)
+
 class CompanyJobPostView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -97,7 +132,7 @@ class JobPostDetailView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def patch(self, request, post_id):
-        serializer = JobPostCreateSerializer(data = request.data, partial = True    )
+        serializer = JobPostCreateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         job_post = update_post_service(user=request.user, post_id=post_id, data=data)

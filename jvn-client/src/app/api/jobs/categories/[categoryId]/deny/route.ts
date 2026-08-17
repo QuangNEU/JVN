@@ -10,7 +10,6 @@ export async function POST(
     const { categoryId } = await params;
     const cookiesStore = await cookies();
     const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value;
-
     if (!accessToken) {
         return NextResponse.json(
             { error: 'access Token not found' },
@@ -19,9 +18,10 @@ export async function POST(
     }
 
     try {
+        const body = await request.json()
         const djangoRes = await axios.post(
             `${process.env.API_URL}/jobs/category/${categoryId}/deny/`,
-            {},
+            body,
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
         return NextResponse.json(djangoRes.data);

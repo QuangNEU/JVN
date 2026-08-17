@@ -15,8 +15,19 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id','title','children']
 
     def get_children(self, obj):
-        approved_children = obj.children.filter(status=Category.Status.APPROVED)
-        return CategorySerializer(approved_children, many=True).data
+        return CategorySerializer(obj.children.all(), many=True).data
+
+class CategoryReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'rejected_reason', 'status', 'created_by', 'parent', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'title', 'created_by', 'parent', 'created_at', 'updated_at']
+
+class CompanyCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'status', 'rejected_reason', 'created_by', 'parent', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'status', 'rejected_reason', 'created_by', 'created_at', 'updated_at']
 
 class JobPostSerializer(serializers.ModelSerializer):
     company_id = serializers.IntegerField(read_only=True) 

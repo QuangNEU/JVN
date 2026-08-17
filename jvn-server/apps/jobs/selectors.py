@@ -4,7 +4,7 @@ from .models import JobPost, SavedJob
 from accounts.models import Account
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
@@ -25,19 +25,33 @@ def get_valid_leaf_categories(category_ids: list[int]):
         })
     return categories
 
-
-
+def get_my_category_requests_selector(*,user: Account, status_filter):
+    have_role(user= user, role = 'company')
+    category = Category.objects.filter(created_by = user).order_by('-created_at')
+    if status_filter:
+        category = category.filter(status = status_filter)
+    return category
 
 def get_approved_category_service():
     return Category.objects.filter(
         status=Category.Status.APPROVED,
         parent__isnull=True
-    ).prefetch_related('children')
+    ).prefetch_related(
+        Prefetch(
+            'children',
+            queryset=Category.objects.filter(status=Category.Status.APPROVED),
+        )
+    )
 
-def get_pending_category_service(*,user:Account):
+def get_admin_category_service(*,user:Account, status_filter = None):
     if user.role != Account.ROLE_CHOICES.ADMIN:
         raise PermissionDenied({'detail': 'Dont have permission'})
-    categories = Category.objects.filter(status = Category.Status.PENDING).select_related('parent')
+    categories = Category.objects.all().order_by('-created_at')
+    if status_filter not in Category.Status.values:
+            raise ValidationError({
+                'status': f'Giá trị không hợp lệ. Chỉ chấp nhận: {", ".join(Category.Status.values)}'
+            })
+    categories = categories.filter(status=status_filter)
     return categories
 
 def expand_category_ids(category_ids: list[int]) -> list[int]:

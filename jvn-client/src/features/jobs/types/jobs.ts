@@ -37,6 +37,36 @@ export interface Category {
     children: Category[]
 }
 
+export interface CategoryRequestItem {
+    id: number
+    title: string
+    status: 'PENDING' | 'APPROVED' | 'REJECTED'
+    rejected_reason: string | null
+    created_by: number | null
+    parent: number | null
+    created_at: string
+    updated_at: string
+}
+
+export interface CategoryRequestPayload {
+    title: string;
+    parent_id?: number;
+}
+
+export interface ResubmitCategoryPayload {
+    categoryId: number;
+    data: CategoryRequestPayload;
+}
+
+export interface DenyCategoryPayload {
+    categoryId: number;
+    reason: string;
+}
+
+export interface MyCategoryRequestsParams {
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
 export interface Tag {
     id: number
     tag_name: string

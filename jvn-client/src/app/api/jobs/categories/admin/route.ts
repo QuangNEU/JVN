@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
         )
     }
     try {
-        const djangoRes = await axios.get(`${process.env.API_URL}/jobs/category/pending/`, {
+        const searchParams = request.nextUrl.searchParams.toString()
+        const djangoRes = await axios.get(`${process.env.API_URL}/jobs/category/${searchParams ? '?' + searchParams : ''}`, {
             headers: { Authorization: `Bearer ${accessToken}` }
         })
         return NextResponse.json(djangoRes.data)

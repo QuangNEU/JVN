@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useTags } from '@/features/resumes/hooks/useTag';
-import { useApprovedCategories } from '@/features/jobs/hooks/useCategory';
+import { useGetApprovedCategories } from '@/features/jobs/hooks/useCategory';
 import { JobPostFormData, JobLevelType, JobTypeType } from '@/features/jobs/types/jobs';
 import CategoryCheckboxTree from '@/features/jobs/components/CategoryCheckboxTree';
 
@@ -60,7 +60,7 @@ export default function JobPostFormFields({
     const tagRef = useRef<HTMLDivElement>(null);
 
     const { data: tags } = useTags();
-    const { data: categories } = useApprovedCategories();
+    const { data: categories } = useGetApprovedCategories();
 
     // nếu initialValues đến muộn hơn (vd đang fetch job detail), đồng bộ lại form khi có data
     useEffect(() => {
