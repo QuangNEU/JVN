@@ -78,5 +78,6 @@ export function useMyCategoryRequests(params?: MyCategoryRequestsParams) {
         queryKey: CATEGORY_KEYS.myRequests(user?.id, params?.status),
         queryFn: () => getMyCategoryRequest(params),
         enabled: !!user,
+        staleTime: 5 * 60 * 1000
     });
 }

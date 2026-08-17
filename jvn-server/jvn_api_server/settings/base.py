@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "resumes",
     'jobs',
     'applications',
+    'companies',
     'django_celery_beat'
 ]
 

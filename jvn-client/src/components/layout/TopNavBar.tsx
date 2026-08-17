@@ -19,6 +19,7 @@ const navItems = [
         ],
     },
     { label: 'Tạo CV', href: '/cvs' },
+    { label: 'Công ty', href: '/companies' },
 ];
 
 export default function TopNavBar() {

@@ -50,6 +50,7 @@ class JobPost(models.Model):
     company = models.ForeignKey(Company,on_delete=models.CASCADE,related_name='job_posts')
     tags = models.ManyToManyField(Tag,related_name='job_posts')
     category = models.ManyToManyField(Category,related_name='job_category')
+    view_count = models.PositiveIntegerField(default=0)
     class Meta:
         ordering =['-created_at']
         indexes = [

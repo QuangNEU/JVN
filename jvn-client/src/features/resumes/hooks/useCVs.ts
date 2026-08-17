@@ -14,6 +14,7 @@ export function useCVs(options: UseCVsOptions = {}) {
         queryFn: cvService.list,
         retry: false,
         enabled: options.enabled ?? true,
+        staleTime: 5 * 60 * 1000
     });
 }
 

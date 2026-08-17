@@ -6,5 +6,6 @@ export function useMyFollows(page = 1) {
         queryKey: ['my-follows', page],
         queryFn: () => followService.getMyFollows(page),
         placeholderData: (previousData) => previousData,
+        staleTime: 10 * 60 * 1000
     });
 }

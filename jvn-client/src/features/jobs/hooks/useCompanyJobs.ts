@@ -6,6 +6,7 @@ export function useCompanyJobs(params: JobPostListParams) {
     return useQuery({
         queryKey: ['company-jobs', params],
         queryFn: () => getMyJobPosts(params),
+        staleTime: 5 * 60 * 1000
     });
 }
 
@@ -24,6 +25,7 @@ export function useJobPostDetail(id: number) {
         queryKey: ['job-post-detail', id],
         queryFn: () => getJobPostDetail(id),
         enabled: !!id,
+        staleTime: 60 * 1000
     });
 }
 

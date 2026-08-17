@@ -71,7 +71,7 @@ class Company(models.Model):
     business_cert_status = models.CharField(max_length=20, choices=CertStatus.choices, default=CertStatus.NOT_SUBMITTED)
     business_cert_rejected_reason = models.CharField(max_length=255, null=True, blank=True)
     business_cert_reviewed_at = models.DateTimeField(null=True, blank=True)
-
+    is_promoted = models.BooleanField(default=False)
     def __str__(self):
         return self.account.name
 

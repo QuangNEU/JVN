@@ -4,7 +4,7 @@ from .models import JobPost, SavedJob
 from accounts.models import Account
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, Count, Prefetch,F
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
@@ -118,21 +118,30 @@ def public_read_post_service(*, filters: dict = None):
 
     return queryset.order_by('-date_posted')
 
-def get_post_detail_selector(*, user:Account, post_id:int):
-    job_post = get_object_or_404(JobPost.objects.prefetch_related('tags','category'), id = post_id, is_deleted=False)
+def get_post_detail_selector(*, user: Account, post_id: int):
+    job_post = get_object_or_404(
+        JobPost.objects.prefetch_related('tags', 'category'), id=post_id, is_deleted=False
+    )
+
     is_public = (
         job_post.status == JobPost.STATUS.PUBLISH
-        and (
-            job_post.expiration_date is None
-            or job_post.expiration_date > timezone.localdate()
-        )
+        and (job_post.expiration_date is None or job_post.expiration_date > timezone.localdate())
     )
-    if is_public:
-        return job_post
-    elif get_owned_or_403(user=user,profile_attr='company',obj=job_post,owner_field='company'):
-        return job_post
-    
-    raise PermissionDenied({'message':'You dont have the permission the read this post'})
+
+    is_owner = (
+        user.is_authenticated
+        and hasattr(user, 'company')
+        and job_post.company_id == user.company.pk
+    )
+
+    if not is_public and not is_owner:
+        raise PermissionDenied({'detail': 'You dont have the permission the read this post'})
+
+    if is_public and not is_owner:
+        JobPost.objects.filter(pk=post_id).update(view_count=F('view_count') + 1)
+        job_post.refresh_from_db(fields=['view_count'])
+
+    return job_post
 
 def is_saved_selector(*, user: Account, job_post_id):
     if not user.is_authenticated or user.role != Account.ROLE_CHOICES.SEEKER:

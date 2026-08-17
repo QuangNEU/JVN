@@ -5,6 +5,7 @@ export function useMyProfile() {
     return useQuery({
         queryKey: ['my-profile'],
         queryFn: getMyProfile,
+        refetchOnWindowFocus: false,
     });
 }
 

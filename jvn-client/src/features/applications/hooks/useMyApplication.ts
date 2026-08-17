@@ -7,5 +7,6 @@ export function useMyApplications(params: GetMyApplicationsParams = {}) {
         queryKey: ['my-applications', params.status ?? 'ALL', params.page ?? 1],
         queryFn: () => applicationService.getMyApplications(params),
         placeholderData: (previousData) => previousData,
+        staleTime: 60 * 1000
     });
 }
