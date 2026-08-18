@@ -138,3 +138,10 @@ export interface JobPostListParams {
     page_size?: number;
     status?: string;
 }
+
+export interface ExpiringJob {
+    id: number;
+    title: string;
+    expiration_date: string;
+    headcount: number;
+}

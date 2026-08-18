@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { companyService } from '../services/companyService';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function useFeaturedCompanies() {
     return useQuery({
@@ -22,5 +23,23 @@ export function useCompanyDetail(companyId: number) {
         queryKey: ['company-detail', companyId],
         queryFn: () => companyService.getDetail(companyId),
         enabled: !!companyId,
+    });
+}
+
+export function useCompanyDashboardSummary() {
+    const user = useAuthStore((state) => state.user);
+    return useQuery({
+        queryKey: ['company', 'dashboard-summary', user?.id],
+        queryFn: companyService.getCompanyDashboardSummary,
+        enabled: !!user,
+    });
+}
+
+export function useApplicationStatusBreakdown() {
+    const user = useAuthStore((state) => state.user);
+    return useQuery({
+        queryKey: ['company', 'application-breakdown', user?.id],
+        queryFn: companyService.getApplicationStatusBreakdown,
+        enabled: !!user,
     });
 }

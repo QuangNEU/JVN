@@ -2,12 +2,12 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
-from .serializers import JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer, CategoryReviewSerializer, CompanyCategorySerializer
+from .serializers import ExpiringJobSerializer, JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer, CategoryReviewSerializer, CompanyCategorySerializer
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .models import Category
 from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
-from .selectors import get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
+from .selectors import get_expring_soon_jobs_selectors, get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
 # Create your views here.
 
 
@@ -163,3 +163,10 @@ class CheckSavedJobView(APIView):
     def get(self, request, job_post_id):
         is_saved = is_saved_selector(user= request.user, job_post_id= job_post_id)
         return Response({'is_saved': is_saved}, status=status.HTTP_200_OK)
+
+class ExpiringJobsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        jobs = get_expring_soon_jobs_selectors(user=request.user)
+        serializer = ExpiringJobSerializer(jobs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

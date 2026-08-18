@@ -5,6 +5,7 @@ import {
     getMyVerificationStatus, sendEmailVerification, submitBusinessCert,
     getBusinessCertList, approveBusinessCert, rejectBusinessCert,
 } from '../services/verificationService';
+import { getAdminCategories } from "@/features/jobs/services/categoryService";
 
 export function useConfirmEmailVerification() {
     return useMutation({ mutationFn: confirmEmailVerification });
@@ -51,5 +52,22 @@ export function useRejectBusinessCert() {
     return useMutation({
         mutationFn: ({ companyId, reason }: { companyId: number; reason: string }) => rejectBusinessCert(companyId, reason),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['business-cert-list'] }),
+    });
+}
+
+
+export function usePendingCategoryCount() {
+    return useQuery({
+        queryKey: ['categories', 'admin', 'PENDING', 'count'],
+        queryFn: () => getAdminCategories({ status: 'PENDING' }),
+        select: (data) => data.count,
+    });
+}
+
+export function usePendingBusinessCertCount() {
+    return useQuery({
+        queryKey: ['business-cert', 'PENDING', 'count'],
+        queryFn: () => getBusinessCertList('PENDING'),
+        select: (data) => data.count,
     });
 }

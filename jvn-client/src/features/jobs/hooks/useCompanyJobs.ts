@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMyJobPosts, deleteJobPost, getJobPostDetail, updateJobPost } from '../services/jobs';
+import { getMyJobPosts, deleteJobPost, getJobPostDetail, updateJobPost, getExpiringJobs } from '../services/jobs';
 import { JobPostListParams, JobPostFormData } from '../types/jobs';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function useCompanyJobs(params: JobPostListParams) {
     return useQuery({
@@ -38,5 +39,14 @@ export function useUpdateJobPost() {
             queryClient.invalidateQueries({ queryKey: ['company-jobs'] });
             queryClient.invalidateQueries({ queryKey: ['job-post-detail', variables.id] });
         },
+    });
+}
+
+export function useExpiringJobs() {
+    const user = useAuthStore((state) => state.user);
+    return useQuery({
+        queryKey: ['jobs', 'expiring-soon', user?.id],
+        queryFn: getExpiringJobs,
+        enabled: !!user,
     });
 }

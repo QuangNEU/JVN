@@ -1,11 +1,12 @@
 # Create your views here.
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
-from .selectors import get_featured_companies_selector, search_companies_selector, get_company_detail_selector
-from .serializers import FeaturedCompanySerializer, CompanyDetailSerializer
+from .selectors import get_application_status_breakdown_selector, get_featured_companies_selector, search_companies_selector, get_company_detail_selector, get_company_dashboard_summary_selector
+from .serializers import ApplicationStatusBreakdownItemSerializer, FeaturedCompanySerializer, CompanyDetailSerializer, CompanyDashboardSummarySerializer
+
 
 
 class FeaturedCompaniesView(APIView):
@@ -38,4 +39,18 @@ class CompanyDetailView(APIView):
         if not company:
             return Response({'error': 'Không tìm thấy công ty.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CompanyDetailSerializer(company)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanyDashboardSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        summary = get_company_dashboard_summary_selector(user=request.user)
+        serializer = CompanyDashboardSummarySerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ApplicationStatusBreakdownView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        breakdown = get_application_status_breakdown_selector(user=request.user)
+        serializer = ApplicationStatusBreakdownItemSerializer(breakdown, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

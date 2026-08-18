@@ -2,6 +2,7 @@ from .models import Category
 from core.permission import have_role
 from .models import JobPost, SavedJob
 from accounts.models import Account
+from datetime import timedelta
 from django.shortcuts import get_object_or_404
 from core.permission import get_owned_or_403
 from django.db.models import Q, Count, Prefetch,F
@@ -153,3 +154,17 @@ def get_saved_job_selector(*, user:Account):
     have_role(user= user, role= 'jobseeker')
     saved_job = SavedJob.objects.filter(job_seeker = user.jobseeker).select_related('job_post', 'job_post__company', 'job_post__company__account').prefetch_related('job_post__tags', 'job_post__category').order_by('-created_at')
     return saved_job
+
+def get_expring_soon_jobs_selectors(*, user:Account, days: int=3):
+    have_role(user= user,role=Account.ROLE_CHOICES.COMPANY)
+    company = user.company
+    today  = timezone.localdate()
+
+    return JobPost.objects.filter(
+        company = company,
+        status = JobPost.STATUS.PUBLISH,
+        is_deleted = False,
+        expiration_date__isnull = False,
+        expiration_date__gte = today,
+        expiration_date__lte = today + timedelta(days)
+    ).order_by('expiration_date')[:5]

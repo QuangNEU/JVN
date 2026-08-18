@@ -27,3 +27,15 @@ export interface PaginatedResponse<T> {
     previous: string | null;
     results: T[];
 }
+
+export interface CompanyDashboardSummary {
+    active_job_count: number;
+    total_applications: number;
+    total_views: number;
+}
+
+export interface ApplicationStatusBreakdownItem {
+    status: string;
+    label: string;
+    count: number;
+}

@@ -12,7 +12,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="flex">
                     <CompanySidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
                     <main className="flex-1">
-                        <VerificationGate>{children}</VerificationGate>
+                        <div className='ml-4 mt-4 mr-4'>
+                            <VerificationGate>
+                                {children}
+                            </VerificationGate>
+                        </div>
                     </main>
                 </div>
             </div>

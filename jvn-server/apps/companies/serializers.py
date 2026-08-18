@@ -3,7 +3,6 @@ from accounts.models import Company
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    """Bản gọn - dùng cho card/list thông thường (không có điểm số)."""
     id = serializers.IntegerField(source='account_id', read_only=True)
     name = serializers.CharField(source='account.name', read_only=True)
 
@@ -28,3 +27,15 @@ class CompanyDetailSerializer(FeaturedCompanySerializer):
         fields = FeaturedCompanySerializer.Meta.fields + [
             'description', 'exact_address', 'website', 'founded_date',
         ]
+
+class CompanyDashboardSummarySerializer(serializers.Serializer):
+    active_job_count = serializers.IntegerField()
+    total_applications = serializers.IntegerField()
+    total_views = serializers.IntegerField()
+
+class ApplicationStatusBreakdownItemSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    label = serializers.CharField()
+    count = serializers.IntegerField()
+
+

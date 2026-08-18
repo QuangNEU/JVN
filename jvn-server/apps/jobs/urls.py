@@ -11,6 +11,7 @@ urlpatterns = [
     path('jobposts/', views.CompanyJobPostView.as_view()),
     path('jobposts/public/', views.PublicJobPostView.as_view()),
     path('jobposts/<int:post_id>/', views.JobPostDetailView.as_view()),
+    path('expiring-soon/', views.ExpiringJobsView.as_view(), name='jobs-expiring-soon'),
     path('saved/<int:job_post_id>/', views.SaveJobView.as_view(), name='save-job'),
     path('saved/', views.MySavedJobView.as_view(), name='my-saved-jobs'),
     path('saved/<int:job_post_id>/status/', views.CheckSavedJobView.as_view(), name='check-saved-job'),

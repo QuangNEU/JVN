@@ -62,7 +62,7 @@ export default function CompanyProfilePage() {
     const previewLogo = logoFile ? URL.createObjectURL(logoFile) : displayData?.logo;
 
     return (
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-4xl mt-4">
             {/* Header */}
             <div className="mb-6 flex items-start justify-between rounded-2xl border border-slate-100 bg-white p-6">
                 <div className="flex items-center gap-4">
@@ -238,7 +238,7 @@ export default function CompanyProfilePage() {
                                     />
                                 </div>
                             ) : (
-                                displayData?.province ? `${displayData?.exact_address ? displayData.exact_address + ', ' : ''}${displayData?.ward}, ${displayData?.province}` : '—'
+                                displayData?.exact_address ? `${displayData?.exact_address} ` : `${displayData?.ward}, ${displayData?.province}`
                             )}
                         </InfoRow>
                     </div>

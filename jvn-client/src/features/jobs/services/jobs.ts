@@ -4,7 +4,8 @@ import {
     JobPost,
     JobPostFormData,
     PaginatedResponse,
-    JobPostListParams
+    JobPostListParams,
+    ExpiringJob
 } from "../types/jobs";
 
 
@@ -33,4 +34,9 @@ export async function deleteJobPost(id: number) {
 export async function getJobPostDetail(id: number): Promise<JobPost> {
     const response = await axiosClient.get(`/jobs/company/${id}`)
     return response.data
+}
+
+export async function getExpiringJobs(): Promise<ExpiringJob[]> {
+    const res = await axiosClient.get('/jobs/expiring-soon');
+    return res.data;
 }

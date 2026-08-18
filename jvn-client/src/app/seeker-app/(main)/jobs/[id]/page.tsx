@@ -42,7 +42,10 @@ function formatDate(value: string | null) {
 }
 
 function fullAddress(job: JobPost) {
-    const parts = [job.company_exact_address, job.company_ward, job.company_province].filter(Boolean);
+    if (job.company_exact_address) {
+        return job.company_exact_address;
+    }
+    const parts = [job.company_ward, job.company_province].filter(Boolean);
     return parts.length > 0 ? parts.join(', ') : null;
 }
 

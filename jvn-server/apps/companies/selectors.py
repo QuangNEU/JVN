@@ -1,18 +1,13 @@
-from django.db.models import OuterRef, Subquery, Count, Case, When, Value, IntegerField, F
+from django.db.models import OuterRef, Subquery, Count, Case, When, Value, IntegerField, F, Sum
 from django.db.models.functions import Coalesce
 from accounts.models import Company, Follow
 from jobs.models import JobPost, SavedJob
 from applications.models import Application
+from accounts.models import Account
+from core.permission import have_role
 
 
 def _annotate_company_score(queryset):
-    """
-    Dùng Subquery riêng cho từng loại đếm (KHÔNG dùng nhiều Count() cùng lúc trên
-    nhiều quan hệ join trong 1 queryset) - đây là bug rất hay gặp trong Django:
-    join nhiều bảng 1-N cùng lúc rồi Count() sẽ nhân chéo (fan-out), ra số liệu sai
-    (VD: company có 3 job + 5 follow sẽ ra follow_count = 15 thay vì 5).
-    Subquery độc lập tránh hoàn toàn vấn đề này, dù tốn thêm vài query con.
-    """
     followers_sq = (
         Follow.objects.filter(company_id=OuterRef('account_id'))
         .values('company_id').annotate(c=Count('id')).values('c')
@@ -73,3 +68,40 @@ def search_companies_selector(*, filters: dict = None):
 def get_company_detail_selector(*, company_id: int):
     queryset = _annotate_company_score(Company.objects.select_related('account'))
     return queryset.filter(account_id=company_id).first()
+
+def get_company_dashboard_summary_selector(*, user: Account):
+    have_role(user=user, role=Account.ROLE_CHOICES.COMPANY)
+    company = user.company
+
+    active_job_count = JobPost.objects.filter(
+        company=company, status=JobPost.STATUS.PUBLISH
+    ).count()
+
+    job_ids = JobPost.objects.filter(company=company).values_list('id', flat=True)
+    total_applications = Application.objects.filter(job_post_id__in=job_ids).count()
+
+    total_views = JobPost.objects.filter(company=company).aggregate(
+        total=Sum('view_count')
+    )['total'] or 0
+
+    return {
+        'active_job_count': active_job_count,
+        'total_applications': total_applications,
+        'total_views': total_views,
+    }
+
+def get_application_status_breakdown_selector(*, user: Account):
+    have_role(user=user, role='company')
+    company = user.company
+
+    raw_counts = dict(
+        Application.objects.filter(
+            job_post__company = company,
+            job_post__is_deleted = False
+        ).values('status').annotate(c = Count('id')).values_list('status', 'c')
+    )
+
+    return [
+        {'status': choice, 'label': label, 'count': raw_counts.get(choice, 0)}
+        for choice, label in Application.Status.choices
+    ]

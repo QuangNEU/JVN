@@ -85,3 +85,8 @@ class SavedJobSerializer(serializers.ModelSerializer):
         model = SavedJob
         fields = ['id', 'job_post', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+class ExpiringJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobPost
+        fields = ['id', 'title', 'expiration_date', 'headcount']
