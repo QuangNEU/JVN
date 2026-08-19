@@ -39,3 +39,17 @@ export interface ApplicationStatusBreakdownItem {
     label: string;
     count: number;
 }
+
+export interface SystemOverview {
+    total_companies: number;
+    total_seekers: number;
+    total_active_jobs: number;
+    total_applications: number;
+}
+
+export interface JobConversionFunnel {
+    total_jobs: number;
+    jobs_with_applications: number;
+    jobs_without_applications: number;
+    conversion_rate: number;
+}

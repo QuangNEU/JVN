@@ -7,7 +7,6 @@ export async function GET() {
     const cookiesStore = await cookies();
     const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value;
 
-    console.log(accessToken)
     if (!accessToken) {
         return NextResponse.json({ error: 'access Token not found' }, { status: 401 });
     }

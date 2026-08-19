@@ -53,3 +53,7 @@ export interface UpdateStatusPayload {
     interview_date?: string;
     rejected_reason?: string;
 }
+
+export interface BulkCheckAppliedResponse {
+    applied_job_ids: number[];
+}

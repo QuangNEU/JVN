@@ -7,4 +7,6 @@ urlpatterns = [
     path('<int:company_id>/', views.CompanyDetailView.as_view()),
     path('dashboard-summary/', views.CompanyDashboardSummaryView.as_view(), name='company-dashboard-summary'),
     path('application-status-breakdown/', views.ApplicationStatusBreakdownView.as_view(), name='company-application-breakdown'),
+    path('system-overview/', views.SystemOverviewView.as_view(), name='system-overview'),
+    path('job-conversion/', views.JobConversionView.as_view(), name='job-conversion'),
 ]

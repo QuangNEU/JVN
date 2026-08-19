@@ -42,3 +42,6 @@ class CompanyApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ['id', 'applicant_name', 'cv', 'cover_letter', 'status', 'date_applied', 'interview_date', 'rejected_reason']
+
+class BulkCheckAppliedSerializer(serializers.Serializer):
+    applied_job_ids = serializers.ListField(child=serializers.IntegerField())

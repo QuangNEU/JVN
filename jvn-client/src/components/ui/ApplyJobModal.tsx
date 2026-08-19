@@ -25,7 +25,6 @@ export default function ApplyJobModal({ jobPostId, jobTitle, isOpen, onClose }: 
         e.preventDefault();
         if (applyJob.isPending) return; // chặn double-submit
         if (!cvId) return;
-
         applyJob.mutate({ cv_id: cvId, cover_letter: coverLetter || undefined });
     };
 
@@ -126,7 +125,11 @@ export default function ApplyJobModal({ jobPostId, jobTitle, isOpen, onClose }: 
 
                         {applyJob.isError && (
                             <p className="mt-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-600">
-                                {applyJob.error instanceof Error ? applyJob.error.message : 'Ứng tuyển thất bại.'}
+                                {
+
+                                    (applyJob.error as any)?.response?.data?.error || (applyJob.error instanceof Error ? applyJob.error.message : 'Ứng tuyển thất bại.')
+
+                                }
                             </p>
                         )}
 

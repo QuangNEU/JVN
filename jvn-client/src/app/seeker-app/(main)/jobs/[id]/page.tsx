@@ -14,6 +14,7 @@ import { useCheckSavedJob } from '@/features/jobs/hooks/useCheckSavedJob';
 import { useFollowCompany } from '@/features/follow/hooks/useFollowCompany';
 import { useCheckFollowing } from '@/features/follow/hooks/useCheckFollowing';
 import { usePublicJobDetail, usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
+import { useCheckApplied } from '@/features/applications/hooks/useApplyJob';
 import { JobPost } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
 import { FacebookIcon, LinkedinIcon } from '@/components/icons/icons';
@@ -66,6 +67,7 @@ export default function PublicJobDetailPage() {
     const router = useRouter();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const { data: savedData } = useCheckSavedJob(id);
+    const { data: isApplied } = useCheckApplied(id);
     const saveJob = useSaveJob(id);
     const isSaved = savedData?.is_saved ?? false;
 
@@ -96,6 +98,7 @@ export default function PublicJobDetailPage() {
             router.push(`/login?redirect=/jobs/${id}`);
             return;
         }
+        if (isApplied) return;
         setShowApplyModal(true);
     };
 
@@ -220,9 +223,11 @@ export default function PublicJobDetailPage() {
                             <div className="mt-5 flex gap-3">
                                 <button
                                     onClick={handleApplyClick}
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
+                                    disabled={isApplied}
+                                    className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white ${isApplied ? 'cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'
+                                        }`}
                                 >
-                                    <Send className="h-4 w-4" /> Ứng tuyển ngay
+                                    <Send className="h-4 w-4" /> {isApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                                 </button>
                                 <button
                                     onClick={handleToggleSave}
@@ -285,9 +290,11 @@ export default function PublicJobDetailPage() {
                             </div>
                             <button
                                 onClick={handleApplyClick}
-                                className="mr-2 hidden items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 sm:flex"
+                                disabled={isApplied}
+                                className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white ${isApplied ? 'cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
                             >
-                                <Send className="h-3.5 w-3.5" /> Ứng tuyển ngay
+                                <Send className="h-4 w-4" /> {isApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                             </button>
                         </div>
 
@@ -333,9 +340,11 @@ export default function PublicJobDetailPage() {
 
                                     <button
                                         onClick={handleApplyClick}
-                                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
+                                        disabled={isApplied}
+                                        className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white ${isApplied ? 'cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'
+                                            }`}
                                     >
-                                        <Send className="h-4 w-4" /> Ứng tuyển ngay
+                                        <Send className="h-4 w-4" /> {isApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                                     </button>
                                 </section>
                             </>

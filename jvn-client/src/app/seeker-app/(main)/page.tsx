@@ -8,7 +8,7 @@ import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 import JobGridCard from '@/components/ui/JobGridCard';
 import JobSearchBar from '@/components/ui/JobSearchBar';
 import CategoryBrowseSection from '@/components/ui/CategoryBrowseSection';
-
+import { useAppliedJobIds } from '@/features/applications/hooks/useApplyJob';
 
 export default function SeekerHomePage() {
     const router = useRouter();
@@ -17,6 +17,8 @@ export default function SeekerHomePage() {
 
     const { data, isLoading, isError } = usePublicJobs({ page: 1, page_size: 9 });
     const jobs = data?.results ?? [];
+    const jobIds = jobs.map((j) => j.id);
+    const { data: appliedIds } = useAppliedJobIds(jobIds);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,7 +81,7 @@ export default function SeekerHomePage() {
                 ) : (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {jobs.map((job) => (
-                            <JobGridCard key={job.id} job={job} />
+                            <JobGridCard key={job.id} job={job} isApplied={appliedIds?.has(job.id)} />
                         ))}
                     </div>
                 )}

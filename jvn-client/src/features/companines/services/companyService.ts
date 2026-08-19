@@ -1,4 +1,4 @@
-import { Company, FeaturedCompany, CompanyDetail, PaginatedResponse, CompanyDashboardSummary, ApplicationStatusBreakdownItem } from '../types/companies';
+import { Company, FeaturedCompany, CompanyDetail, PaginatedResponse, CompanyDashboardSummary, ApplicationStatusBreakdownItem, JobConversionFunnel, SystemOverview } from '../types/companies';
 import axiosClient from '@/services/axios';
 
 export const companyService = {
@@ -24,6 +24,14 @@ export const companyService = {
 
     getApplicationStatusBreakdown: async (): Promise<ApplicationStatusBreakdownItem[]> => {
         const res = await axiosClient.get('/companies/application-status-breakdown');
+        return res.data;
+    },
+    getSystemOverview: async (): Promise<SystemOverview> => {
+        const res = await axiosClient.get('/companies/system-overview');
+        return res.data;
+    },
+    getJobConversionFunnel: async (): Promise<JobConversionFunnel> => {
+        const res = await axiosClient.get('/companies/job-conversion-funnel');
         return res.data;
     },
 };

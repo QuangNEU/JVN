@@ -38,4 +38,14 @@ class ApplicationStatusBreakdownItemSerializer(serializers.Serializer):
     label = serializers.CharField()
     count = serializers.IntegerField()
 
+class SystemOverviewSerializer(serializers.Serializer):
+    total_companies = serializers.IntegerField()
+    total_seekers = serializers.IntegerField()
+    total_active_jobs = serializers.IntegerField()
+    total_applications = serializers.IntegerField()
 
+class JobConversionSerializer(serializers.Serializer):
+    total_jobs = serializers.IntegerField()
+    jobs_with_applications = serializers.IntegerField()
+    jobs_without_applications = serializers.IntegerField()
+    conversion_rate = serializers.FloatField()

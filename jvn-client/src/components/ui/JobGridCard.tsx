@@ -28,7 +28,7 @@ function timeAgo(dateStr: string | null) {
 const PANEL_WIDTH = 400;
 const PANEL_GAP = 14;
 
-export default function JobGridCard({ job }: { job: JobPost }) {
+export default function JobGridCard({ job, isApplied = false }: { job: JobPost; isApplied?: boolean }) {
     const router = useRouter();
     const cardRef = useRef<HTMLAnchorElement>(null);
     const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -145,10 +145,18 @@ export default function JobGridCard({ job }: { job: JobPost }) {
                             Xem chi tiết
                         </button>
                         <button
-                            onClick={(e) => { e.preventDefault(); router.push(`/jobs/${job.id}`); }}
-                            className="flex-1 rounded-full bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (isApplied) return;
+                                router.push(`/jobs/${job.id}`);
+                            }}
+                            disabled={isApplied}
+                            className={`flex-1 rounded-full px-4 py-2.5 text-sm font-bold ${isApplied
+                                    ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                }`}
                         >
-                            Ứng tuyển
+                            {isApplied ? 'Đã ứng tuyển' : 'Ứng tuyển'}
                         </button>
                     </div>
                 </div>

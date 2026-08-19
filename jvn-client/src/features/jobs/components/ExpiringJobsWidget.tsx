@@ -14,7 +14,7 @@ export default function ExpiringJobsWidget() {
     const { data, isLoading } = useExpiringJobs();
 
     if (isLoading) return null;
-    if (!data || data.length === 0) return null; // không có tin sắp hết hạn thì ẩn hẳn, khỏi chiếm chỗ vô ích
+    if (!data || data.length === 0) return null;
 
     return (
         <div className="rounded-2xl border border-amber-100 bg-amber-50 p-5">

@@ -17,7 +17,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     }, []);
 
     useEffect(() => {
-        console.log('DEBUG user:', user);   // ← thêm dòng này
 
         if (!isLoading && (!user || user.role !== 'ADMIN')) {
             router.replace('/login');

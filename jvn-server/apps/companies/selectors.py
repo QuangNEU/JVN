@@ -1,9 +1,10 @@
 from django.db.models import OuterRef, Subquery, Count, Case, When, Value, IntegerField, F, Sum
 from django.db.models.functions import Coalesce
-from accounts.models import Company, Follow
+from accounts.models import Company, Follow, Account, JobSeeker
 from jobs.models import JobPost, SavedJob
 from applications.models import Application
-from accounts.models import Account
+from django.utils import timezone
+from datetime import timedelta
 from core.permission import have_role
 
 
@@ -105,3 +106,38 @@ def get_application_status_breakdown_selector(*, user: Account):
         {'status': choice, 'label': label, 'count': raw_counts.get(choice, 0)}
         for choice, label in Application.Status.choices
     ]
+
+def get_system_overview_selector(*, user: Account):
+    have_role(user= user, role= Account.ROLE_CHOICES.ADMIN)
+
+    data = {
+        'total_companies': Company.objects.count(),
+        'total_seekers': JobSeeker.objects.count(),
+        'total_active_jobs': JobPost.objects.filter(
+            status=JobPost.STATUS.PUBLISH, is_deleted=False
+        ).count(),
+        'total_applications': Application.objects.count(),
+    }
+    
+    return data
+
+def get_job_conversion_selector(*, user:Account, min_age_days: int = 3):
+    have_role(user= user, role= Account.ROLE_CHOICES.ADMIN)
+    
+    cutoff_date = timezone.localdate() - timedelta(days=min_age_days)
+
+    active_job = JobPost.objects.filter(
+        status = JobPost.STATUS.PUBLISH, 
+        is_deleted = False, 
+        date_posted__isnull=False,
+        date_posted__lte=cutoff_date,)
+    total = active_job.count()
+    job_with_application = active_job.annotate(
+        app_count = Count('applications')
+    ).filter(app_count__gt = 0).count()
+    return {
+        'total_jobs': total,
+        'jobs_with_applications': job_with_application,
+        'jobs_without_applications': total - job_with_application,
+        'conversion_rate': round(job_with_application/total *100,2) if total>0 else 0 
+    }

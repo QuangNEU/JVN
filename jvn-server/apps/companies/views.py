@@ -4,8 +4,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
-from .selectors import get_application_status_breakdown_selector, get_featured_companies_selector, search_companies_selector, get_company_detail_selector, get_company_dashboard_summary_selector
-from .serializers import ApplicationStatusBreakdownItemSerializer, FeaturedCompanySerializer, CompanyDetailSerializer, CompanyDashboardSummarySerializer
+from .selectors import get_job_conversion_selector, get_system_overview_selector, get_application_status_breakdown_selector, get_featured_companies_selector, search_companies_selector, get_company_detail_selector, get_company_dashboard_summary_selector
+from .serializers import JobConversionSerializer, SystemOverviewSerializer, ApplicationStatusBreakdownItemSerializer, FeaturedCompanySerializer, CompanyDetailSerializer, CompanyDashboardSummarySerializer
 
 
 
@@ -53,4 +53,18 @@ class ApplicationStatusBreakdownView(APIView):
     def get(self, request):
         breakdown = get_application_status_breakdown_selector(user=request.user)
         serializer = ApplicationStatusBreakdownItemSerializer(breakdown, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class SystemOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        overview = get_system_overview_selector(user=request.user)
+        serializer = SystemOverviewSerializer(overview)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class JobConversionView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        funnel = get_job_conversion_selector(user=request.user)
+        serializer = JobConversionSerializer(funnel)
         return Response(serializer.data, status=status.HTTP_200_OK)

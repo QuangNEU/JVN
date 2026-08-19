@@ -23,4 +23,4 @@ def send_application_status_email_task(self, application_id):
         send_application_status_email(application)
     except Exception as exc:
         logger.exception(f'[send_application_status_email_task] Gửi email thất bại, application_id={application_id}, thử lại lần {self.request.retries + 1}/{self.max_retries}')
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc, countdown=60)

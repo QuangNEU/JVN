@@ -1,60 +1,36 @@
-import { Application, ApplyJobPayload, GetMyApplicationsParams, PaginatedResponse, CompanyApplication, UpdateStatusPayload } from '../types/application';
-
-async function parseErrorMessage(res: Response): Promise<string> {
-    const body = await res.json().catch(() => null);
-    if (!body) return 'Có lỗi xảy ra, vui lòng thử lại.';
-    if (typeof body.error === 'string') return body.error;
-    if (typeof body.detail === 'string') return body.detail;
-    if (Array.isArray(body.non_field_errors)) return body.non_field_errors[0];
-    const firstKey = Object.keys(body)[0];
-    if (firstKey && Array.isArray(body[firstKey])) return body[firstKey][0];
-    return 'Có lỗi xảy ra, vui lòng thử lại.';
-}
+import axiosClient from '@/services/axios';
+import { Application, ApplyJobPayload, GetMyApplicationsParams, PaginatedResponse, CompanyApplication, UpdateStatusPayload, BulkCheckAppliedResponse } from '../types/application';
 
 export const applicationService = {
     applyJob: async (jobPostId: number, payload: ApplyJobPayload): Promise<Application> => {
-        const res = await fetch(`/api/applications/apply/${jobPostId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+        const res = await axiosClient.post(`/applications/apply/${jobPostId}`, payload);
+        return res.data;
+    },
+
+    getMyApplications: async (params: GetMyApplicationsParams = {}): Promise<PaginatedResponse<Application>> => {
+        const res = await axiosClient.get('/applications/me', { params });
+        return res.data;
+    },
+
+    getJobApplicants: async (jobId: number, status?: string): Promise<PaginatedResponse<CompanyApplication>> => {
+        const res = await axiosClient.get(`/applications/job/${jobId}`, { params: status ? { status } : {} });
+        return res.data;
+    },
+
+    updateApplicationStatus: async (applicationId: number, payload: UpdateStatusPayload): Promise<CompanyApplication> => {
+        const res = await axiosClient.patch(`/applications/update-status/${applicationId}`, payload);
+        return res.data;
+    },
+
+    checkApplied: async (jobPostId: number): Promise<{ is_applied: boolean }> => {
+        const res = await axiosClient.get(`/applications/check-applied/${jobPostId}`);
+        return res.data;
+    },
+    checkAppliedBulk: async (jobPostIds: number[]): Promise<BulkCheckAppliedResponse> => {
+        const res = await axiosClient.get('/applications/check-applied/bulk', {
+            params: { job_post_ids: jobPostIds },
+            paramsSerializer: { indexes: null },
         });
-        if (!res.ok) throw new Error(await parseErrorMessage(res));
-        return res.json();
-    },
-
-    getMyApplications: async (
-        params: GetMyApplicationsParams = {}
-    ): Promise<PaginatedResponse<Application>> => {
-        const search = new URLSearchParams();
-        if (params.status) search.set('status', params.status);
-        if (params.page) search.set('page', String(params.page));
-        const query = search.toString() ? `?${search.toString()}` : '';
-
-        const res = await fetch(`/api/applications/me${query}`, { method: 'GET' });
-        if (!res.ok) throw new Error(await parseErrorMessage(res));
-        return res.json();
-    },
-    getJobApplicants: async (
-        jobId: number,
-        status?: string
-    ): Promise<PaginatedResponse<CompanyApplication>> => {
-        const query = status ? `?status=${encodeURIComponent(status)}` : '';
-        const res = await fetch(`/api/applications/job/${jobId}${query}`, { method: 'GET' });
-        if (!res.ok) throw new Error(await parseErrorMessage(res));
-        return res.json();
-    },
-
-    updateApplicationStatus: async (
-        applicationId: number,
-        payload: UpdateStatusPayload
-    ): Promise<CompanyApplication> => {
-        const res = await fetch(`/api/applications/update-status/${applicationId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error(await parseErrorMessage(res));
-        return res.json();
-    },
+        return res.data;
+    }
 };
-

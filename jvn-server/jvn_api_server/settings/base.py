@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
 
 # Cấu hình thời hạn của Token (JWT)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15), 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    
     'AUTH_HEADER_TYPES': ('Bearer',),       
     'BLACKLIST_AFTER_ROTATION': True,

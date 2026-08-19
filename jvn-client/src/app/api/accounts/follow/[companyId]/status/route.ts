@@ -8,7 +8,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { companyId } = await params
     const cookiesStore = await cookies()
     const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
-
     try {
         const djangoRes = await axios.get(
             `${process.env.API_URL}/accounts/follow/${companyId}/status/`,
