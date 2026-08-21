@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ categoryId: string }> }) {
     const cookiesStore = await cookies()
-    const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
+    const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
     const id = await (await params).categoryId
 
     if (!accessToken) {

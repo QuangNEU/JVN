@@ -31,10 +31,7 @@ export default function CategoryBrowseSection() {
     };
 
     return (
-        <div
-            className="grid min-h-[240px] grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-lg sm:grid-cols-[1fr_1.3fr]"
-            onMouseLeave={() => setHovered(null)}
-        >
+        <div className="grid min-h-[320px] grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-lg sm:grid-cols-[1fr_1.3fr]" onMouseLeave={() => setHovered(null)}>
             {/* Danh sách danh mục */}
             <div className="flex flex-col p-2">
                 {isLoading ? (
@@ -43,8 +40,8 @@ export default function CategoryBrowseSection() {
                     </div>
                 ) : hasCategories ? (
                     <>
-                        <div className="flex-1 divide-y divide-slate-100">
-                            {visibleCategories.map((cat) => (
+                        <div className="flex-1 divide-y divide-slate-100 min-h-[250px]">
+                            {visibleCategories.map((cat: Category) => (
                                 <Link
                                     key={cat.id}
                                     href={`/jobs?category_ids=${cat.id}`}

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useQueryClient } from '@tanstack/react-query';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 
 export default function CompanyTopBar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     const { user, logout } = useAuthStore();
@@ -41,11 +42,9 @@ export default function CompanyTopBar({ onToggleSidebar }: { onToggleSidebar: ()
             </div>
 
             <div className="flex items-center gap-2">
-
-                <button className="relative rounded-full p-2.5 text-slate-300 hover:bg-slate-800">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-                </button>
+                <div className='mr-5'>
+                    <NotificationBell />
+                </div>
 
                 <div className="relative">
                     <button

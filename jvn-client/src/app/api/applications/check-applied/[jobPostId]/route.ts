@@ -9,7 +9,7 @@ export async function GET(
 ) {
     const { jobPostId } = await params;
     const cookiesStore = await cookies()
-    const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
+    const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
 
     try {
         const djangoRes = await axios.get(`${process.env.API_URL}/applications/check-applied/${jobPostId}/`,

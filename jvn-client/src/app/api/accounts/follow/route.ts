@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
     const cookiesStore = await cookies()
-    const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
+    const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
 
     if (!accessToken) {
         return NextResponse.json({ error: "access Token not found" }, { status: 401 });

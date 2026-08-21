@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronDown, User, Send, Heart, Building2, LogOut, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 
 const navItems = [
     {
@@ -118,8 +119,12 @@ export default function TopNavBar() {
                     document.body
                 )}
 
+
                 {/* Auth area (Giữ nguyên như cũ của bạn) */}
                 <div className="flex items-center gap-3">
+                    <div>
+                        <NotificationBell />
+                    </div>
                     {isLoading ? (
                         <div className="flex items-center gap-3">
                             <div className="h-9 w-28 animate-pulse rounded-full bg-gray-200" />

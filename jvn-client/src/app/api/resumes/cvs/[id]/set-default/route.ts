@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const cookiesStore = await cookies()
-    const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
+    const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
     const { id } = await params
     if (!accessToken) {
         return NextResponse.json(

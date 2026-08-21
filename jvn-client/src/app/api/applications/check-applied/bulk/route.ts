@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams.toString();
     const cookiesStore = await cookies()
-    const accessToken = await cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
+    const accessToken = cookiesStore.get(AUTH_KEYS.ACCESS_TOKEN)?.value
     try {
         const djangoRes = await axios.get(`${process.env.API_URL}/applications/check-applied/bulk/${searchParams ? '?' + searchParams : ''}`,
             accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined);

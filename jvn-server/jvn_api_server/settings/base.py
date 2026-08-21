@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'jobs',
     'applications',
     'companies',
+    'notifications',
     'django_celery_beat'
 ]
 
