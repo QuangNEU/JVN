@@ -1,5 +1,3 @@
-// utils/date.ts
-
 /**
  * Tính số ngày còn lại từ hôm nay đến một ngày đích
  * @param dateStr Chuỗi ngày tháng (VD: "2026-08-22")
