@@ -14,6 +14,7 @@ import { useJobApplicants } from '@/features/applications/hooks/useJobApplicant'
 import ApplicantCard from '@/components/ui/ApplicantCard';
 import { STATUS_FILTER_TABS } from '@/constants/application';
 import { ApplicationStatus } from '@/features/applications/types/application';
+import { daysLeft } from '@/utils/date';
 const typeLabels: Record<string, string> = {
     FULLTIME: 'Toàn thời gian',
     PARTTIME: 'Bán thời gian',
@@ -43,11 +44,7 @@ function formatDate(value: string | null) {
     return new Date(value).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function daysLeft(expirationDate: string | null) {
-    if (!expirationDate) return null;
-    const diff = (new Date(expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-    return Math.ceil(diff);
-}
+
 
 export default function JobPostDetailPage() {
     const router = useRouter();
@@ -333,8 +330,8 @@ export default function JobPostDetailPage() {
                                 key={tab.value}
                                 onClick={() => setStatusFilter(tab.value)}
                                 className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${statusFilter === tab.value
-                                        ? 'bg-amber-500 text-white'
-                                        : 'bg-white text-slate-600 hover:bg-slate-100'
+                                    ? 'bg-amber-500 text-white'
+                                    : 'bg-white text-slate-600 hover:bg-slate-100'
                                     }`}
                             >
                                 {tab.label}

@@ -43,3 +43,12 @@ export function useApplicationStatusBreakdown() {
         enabled: !!user,
     });
 }
+
+export function useJobsPendingReview() {
+    const user = useAuthStore((state) => state.user);
+    return useQuery({
+        queryKey: ['company', 'jobs-pending-review', user?.id],
+        queryFn: companyService.getJobsPendingReview,
+        enabled: !!user,
+    });
+}

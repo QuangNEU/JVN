@@ -2,7 +2,7 @@
 
 import { Briefcase, Users, Eye, Sparkles } from 'lucide-react';
 import { useCompanyDashboardSummary } from '@/features/companines/hooks/useCompanies';
-import VerificationLevelWidget from '@/features/accounts/components/VerificationLevelWidget';
+import JobsPendingReviewWidget from '@/features/companines/components/JobsPendingReviewWidget';
 import ExpiringJobsWidget from '@/features/jobs/components/ExpiringJobsWidget';
 import ApplicationStatusBreakdownWidget from '@/features/companines/components/ApplicationStatusBreakdownWidget';
 
@@ -19,9 +19,6 @@ export default function DashboardPage() {
         <div>
             <h1 className="mb-1 text-2xl font-bold text-slate-800">Tổng quan</h1>
             <p className="mb-6 text-sm text-slate-500">Chào mừng quay trở lại!</p>
-            <div className="mt-5 mb-7 w-1/4">
-                <VerificationLevelWidget />
-            </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((s) => (
                     <div key={s.label} className="rounded-2xl border border-slate-100 bg-white p-5">
@@ -43,7 +40,8 @@ export default function DashboardPage() {
                     <p className="mt-1 text-sm text-slate-400">Tỷ lệ phù hợp (AI)</p>
                 </div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                <JobsPendingReviewWidget />
                 <ExpiringJobsWidget />
             </div>
             <div className="mt-5">

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Briefcase, Users, Building2, Tags } from 'lucide-react';
+import VerificationLevelWidget from '@/features/accounts/components/VerificationLevelWidget';
 
 const navItems = [
     { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
@@ -27,6 +28,9 @@ export default function CompanySidebar({
                 className={`fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-slate-100 bg-white transition-transform lg:static lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
+                <div className="mb-5 border-b w-100% h-30px">
+                    <VerificationLevelWidget />
+                </div>
                 <nav className="space-y-1 p-4">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');

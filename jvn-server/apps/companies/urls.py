@@ -9,4 +9,5 @@ urlpatterns = [
     path('application-status-breakdown/', views.ApplicationStatusBreakdownView.as_view(), name='company-application-breakdown'),
     path('system-overview/', views.SystemOverviewView.as_view(), name='system-overview'),
     path('job-conversion/', views.JobConversionView.as_view(), name='job-conversion'),
+    path('jobs-pending-review/', views.JobsPendingReviewView.as_view(), name='jobs-pending-review'),
 ]

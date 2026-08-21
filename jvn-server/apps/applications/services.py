@@ -14,10 +14,10 @@ def apply_job_services(*,user:Account,job_post_id:int, data:dict):
     job_seeker = user.jobseeker
     job_post = get_object_or_404(JobPost, pk=job_post_id)
     if(job_post.status != JobPost.STATUS.PUBLISH):
-        raise PermissionDenied({'error': 'You dont have permission to access this post'})
+        raise PermissionDenied({'detail': 'You dont have permission to access this post'})
     
     if Application.objects.filter(applicant=job_seeker,job_post = job_post).exists():
-        raise ValidationError({'error': 'You have applied this job.'})
+        raise ValidationError({'detail': 'You have applied this job.'})
     
     application = Application.objects.create(
         applicant=job_seeker,

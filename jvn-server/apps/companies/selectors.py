@@ -1,4 +1,4 @@
-from django.db.models import OuterRef, Subquery, Count, Case, When, Value, IntegerField, F, Sum
+from django.db.models import OuterRef, Subquery, Count, Case, When, Value, IntegerField, F, Sum, Q
 from django.db.models.functions import Coalesce
 from accounts.models import Company, Follow, Account, JobSeeker
 from jobs.models import JobPost, SavedJob
@@ -107,6 +107,22 @@ def get_application_status_breakdown_selector(*, user: Account):
         for choice, label in Application.Status.choices
     ]
 
+def get_jobs_pending_review_selector(*, user: Account):
+    have_role(user= user, role='company')
+    company = user.company
+
+    pending_jobposts = JobPost.objects.filter(
+        company = company,
+        status = JobPost.STATUS.PUBLISH,
+        is_deleted = False
+    ).annotate(
+        pending_count = Count(
+            'applications', filter=Q(applications__status__in = [Application.Status.SENT, Application.Status.RECEIVED])
+        )
+    ).filter(pending_count__gt = 0).order_by('-pending_count')[:5]
+
+    return pending_jobposts
+
 def get_system_overview_selector(*, user: Account):
     have_role(user= user, role= Account.ROLE_CHOICES.ADMIN)
 
@@ -141,3 +157,5 @@ def get_job_conversion_selector(*, user:Account, min_age_days: int = 3):
         'jobs_without_applications': total - job_with_application,
         'conversion_rate': round(job_with_application/total *100,2) if total>0 else 0 
     }
+
+

@@ -53,3 +53,8 @@ export interface JobConversionFunnel {
     jobs_without_applications: number;
     conversion_rate: number;
 }
+export interface JobPendingReview {
+    id: number;
+    title: string;
+    pending_count: number;
+}

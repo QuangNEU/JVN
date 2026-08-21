@@ -4,11 +4,7 @@
 import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useExpiringJobs } from '../hooks/useCompanyJobs';
-
-function daysLeft(dateStr: string) {
-    const diff = new Date(dateStr).getTime() - new Date().setHours(0, 0, 0, 0);
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
+import { daysLeft } from '@/utils/date';
 
 export default function ExpiringJobsWidget() {
     const { data, isLoading } = useExpiringJobs();

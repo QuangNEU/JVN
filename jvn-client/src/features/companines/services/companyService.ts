@@ -1,4 +1,4 @@
-import { Company, FeaturedCompany, CompanyDetail, PaginatedResponse, CompanyDashboardSummary, ApplicationStatusBreakdownItem, JobConversionFunnel, SystemOverview } from '../types/companies';
+import { JobPendingReview, FeaturedCompany, CompanyDetail, PaginatedResponse, CompanyDashboardSummary, ApplicationStatusBreakdownItem, JobConversionFunnel, SystemOverview } from '../types/companies';
 import axiosClient from '@/services/axios';
 
 export const companyService = {
@@ -32,6 +32,11 @@ export const companyService = {
     },
     getJobConversionFunnel: async (): Promise<JobConversionFunnel> => {
         const res = await axiosClient.get('/companies/job-conversion-funnel');
+        return res.data;
+    },
+
+    getJobsPendingReview: async (): Promise<JobPendingReview[]> => {
+        const res = await axiosClient.get('/companies/jobs-pending-review');
         return res.data;
     },
 };

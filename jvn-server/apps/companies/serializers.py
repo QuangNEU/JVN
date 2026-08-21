@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from accounts.models import Company
+from jobs.models import JobPost
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -49,3 +50,10 @@ class JobConversionSerializer(serializers.Serializer):
     jobs_with_applications = serializers.IntegerField()
     jobs_without_applications = serializers.IntegerField()
     conversion_rate = serializers.FloatField()
+
+class JobPendingReviewSerializer(serializers.ModelSerializer):
+    pending_count = serializers.IntegerField()
+
+    class Meta:
+        model = JobPost
+        fields = ['id', 'title', 'pending_count']
