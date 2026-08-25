@@ -3,6 +3,7 @@ import uuid
 from django.db import transaction,IntegrityError
 from .models import Account,JobSeeker,Company,Follow
 from .tasks import send_verification_email_task
+from notifications.services import create_notification_service
 from core.permission import have_role
 from core.validator import validate_file
 from rest_framework.exceptions import ValidationError
@@ -265,7 +266,7 @@ def submit_business_certificate(*, user:Account, document):
     validate_file(file_obj=document)
     company = user.company
     if company.business_cert_status == Company.CertStatus.APPROVED:
-        raise ValidationError({'error': 'You have submit your bussiness certificate'})
+        raise ValidationError({'detail': 'You have submit your bussiness certificate'})
     company.business_cert_document = document
     company.business_cert_status = Company.CertStatus.PENDING
     company.business_cert_rejected_reason = None
@@ -274,21 +275,35 @@ def submit_business_certificate(*, user:Account, document):
 
 def approve_business_certificate(*, user: Account, company_id: int):
     if user.role != Account.ROLE_CHOICES.ADMIN:
-        raise PermissionError({'error': 'You dont have the permission to approve the certificate'})  
+        raise PermissionError({'detail': 'You dont have the permission to approve the certificate'})  
     company = get_object_or_404(Company, pk = company_id)
+    if company.business_cert_status != Company.CertStatus.PENDING:
+        raise ValidationError({'detail': 'This certificate is not in PENDING status.'})
     company.business_cert_status = Company.CertStatus.APPROVED
     company.business_cert_reviewed_at = timezone.now()
     company.save(update_fields=['business_cert_status', 'business_cert_reviewed_at'])
+    create_notification_service(
+        user= company.account,
+        message= f'Giấy phép kinh doanh của bạn đã được duyệt',
+        link=''
+    )
     return company
 
 def reject_business_certificate(*, user: Account, company_id, reason):
     if user.role != Account.ROLE_CHOICES.ADMIN:
         raise PermissionError({'error':'You dont have the permission to reject the certificate'})
     company = get_object_or_404(Company, pk = company_id)
+    if company.business_cert_status != Company.CertStatus.PENDING:
+        raise ValidationError({'detail': 'This certificate is not in PENDING status.'})
     company.business_cert_status = company.CertStatus.REJECTED
     company.business_cert_reviewed_at = timezone.now()
     company.business_cert_rejected_reason = reason
     company.save(update_fields=['business_cert_status', 'business_cert_reviewed_at', 'business_cert_rejected_reason'])
+    create_notification_service(
+        user= company.account,
+        message= f'Giấy phép kinh doanh của bạn bị từ chối do {reason}',
+        link=''
+    )
     return company
 
     

@@ -91,10 +91,14 @@ def public_read_post_service(*, filters: dict = None):
 
     locations = filters.get('locations')
     if locations:
-        queryset = queryset.filter(
-            Q(company__province__icontains=locations) |
-            Q(company__ward__icontains=locations)
-        )
+        location_q = Q()
+        for loc in locations:
+            location_q |= Q(company__province__icontains=loc) | Q(company__ward__icontains=loc)
+        queryset = queryset.filter(location_q)
+    
+    company_id = filters.get('company_id')
+    if company_id:
+        queryset = queryset.filter(company_id=company_id)
 
     salary_min = filters.get('salary_min')
     if salary_min:

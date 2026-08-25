@@ -29,6 +29,7 @@ export interface PublicJobFilterPayload {
     level?: JobLevelType;
     category_ids?: number[];
     type?: JobTypeType;
+    company_id?: number;
 }
 
 export interface Category {

@@ -39,7 +39,7 @@ export default function NotificationBell() {
         }
     };
 
-    const handleClickNotification = (n: { id: number; link: string | null; is_read: boolean }) => {
+    const handleClickNotification = (n: { id: number; link: string | null; is_read: boolean, message: string }) => {
         if (!n.is_read) markRead.mutate(n.id);
         if (n.link) router.push(n.link);
     };

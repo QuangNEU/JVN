@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from .selectors import get_my_notifications_selector, get_unread_notification_count_selector
 from .serializers import NotificationSerializer
-from .services import create_notification_service, mark_notification_read_service, mark_all_notification_read_service
+from .services import  mark_notification_read_service, mark_all_notification_read_service
 from rest_framework.response import Response
 from core.pagnigation import StandardResultsPagination
 # Create your views here.

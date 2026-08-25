@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from accounts.models import Account
 from jobs.models import JobPost
+from notifications.services import create_notification_service
 from core.permission import have_role, get_owned_or_403
 from .models import Application
 from django.shortcuts import get_object_or_404
@@ -43,8 +44,32 @@ def update_application_status(*, user: Account,data: dict, application_id):
         updated_field.append('rejected_reason')
     application.save(update_fields=updated_field)
 
+    job_title = application.job_post.title
+    notification_message = get_application_status_message(status_val, job_title)
+
+    create_notification_service(
+        user= application.applicant.account,
+        data={
+            'message': notification_message,
+            'link': f'/jobs/{application.job_post.id}', 
+            'is_read': False
+        },
+        send_email=  False
+    )
+
     transaction.on_commit(lambda: send_application_status_email_task.delay(application.id))
     return application
 
-
+def get_application_status_message(status_val, job_title):
+    messages = {
+        Application.Status.SENT: f"Hồ sơ của bạn đã được gửi thành công ứng tuyển công việc {job_title}. Hãy cùng chờ tin tốt nhé!",
+        Application.Status.RECEIVED: f"Nhà tuyển dụng đã tiếp nhận hồ sơ của bạn cho công việc {job_title} và sẽ sớm phản hồi.",
+        Application.Status.WATCHED: f"Nhà tuyển dụng vừa xem CV của bạn cho công việc {job_title}.",
+        Application.Status.SUITABLE: f"Tin vui! Hồ sơ của bạn cho công việc {job_title} được đánh giá là rất phù hợp. Hãy chuẩn bị tinh thần cho bước tiếp theo nhé.",
+        Application.Status.INTERVIEWING: f"Chúc mừng! Nhà tuyển dụng muốn mời bạn tham gia phỏng vấn cho công việc {job_title}.",
+        Application.Status.HIRED: f"Tuyệt vời! Bạn đã trúng tuyển công việc {job_title}. Chúc bạn có một hành trình công việc thật bùng nổ!",
+        Application.Status.REJECTED: f"Rất tiếc, hồ sơ ứng tuyển {job_title} của bạn chưa phù hợp ở thời điểm hiện tại. Đừng nản lòng, vẫn còn rất nhiều cơ hội khác đang chờ bạn!"
+    }
     
+    # Trả về message tương ứng, nếu không có thì dùng câu mặc định
+    return messages.get(status_val, f"Trạng thái hồ sơ vị trí {job_title} của bạn vừa được cập nhật.")

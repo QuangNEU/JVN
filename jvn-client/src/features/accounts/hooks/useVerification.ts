@@ -61,6 +61,8 @@ export function usePendingCategoryCount() {
         queryKey: ['categories', 'admin', 'PENDING', 'count'],
         queryFn: () => getAdminCategories({ status: 'PENDING' }),
         select: (data) => data.count,
+        refetchInterval: 20 * 1000,
+        refetchIntervalInBackground: false,
     });
 }
 

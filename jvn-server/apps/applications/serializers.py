@@ -19,7 +19,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class UpdateStatusSerializer(serializers.Serializer):
     status = serializers.CharField(max_length = 20)
     interview_date = serializers.DateTimeField(required = False, allow_null = True)
-    rejected_reason = serializers.CharField(required = False, allow_null = True)
+    rejected_reason = serializers.CharField(required = False, allow_null = True, allow_blank = True)
+    
     def validate(self, attrs):
         if attrs.get('status') == Application.Status.INTERVIEWING and not attrs.get('interview_date'):
             raise serializers.ValidationError(
@@ -42,6 +43,13 @@ class CompanyApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ['id', 'applicant_name', 'cv', 'cover_letter', 'status', 'date_applied', 'interview_date', 'rejected_reason']
-
+        extra_kwargs = {
+            'rejected_reason': {
+                'allow_null': True, 
+                'required': False,
+                'allow_blank': True 
+            }
+        }
+        
 class BulkCheckAppliedSerializer(serializers.Serializer):
     applied_job_ids = serializers.ListField(child=serializers.IntegerField())

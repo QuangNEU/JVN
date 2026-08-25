@@ -112,6 +112,8 @@ class PublicJobPostView(APIView):
             'level': request.query_params.get('level'),
             'type': request.query_params.get('type'),
             'category_ids': category_ids,
+            'company_id': request.query_params.get('company_id'),
+
         }
         job_posts = public_read_post_service(filters=filters)
 

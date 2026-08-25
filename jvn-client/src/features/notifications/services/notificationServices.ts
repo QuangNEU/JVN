@@ -2,7 +2,6 @@ import { PaginatedResponse } from "@/features/companines/types/companies";
 import { AppNotification } from "../types/notifications";
 import axiosClient from "@/services/axios";
 
-
 export const notificationServices = {
     getList: async (): Promise<PaginatedResponse<AppNotification>> => {
         const res = await axiosClient.get(`/notifications`)

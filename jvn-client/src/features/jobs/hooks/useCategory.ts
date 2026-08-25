@@ -26,6 +26,8 @@ export function useAdminCategories(params?: MyCategoryRequestsParams) {
         queryKey: CATEGORY_KEYS.admin(params?.status),
         queryFn: () => getAdminCategories(params),
         enabled: !!user,
+        refetchInterval: 20 * 1000,
+        refetchIntervalInBackground: false,
     });
 }
 
@@ -78,6 +80,5 @@ export function useMyCategoryRequests(params?: MyCategoryRequestsParams) {
         queryKey: CATEGORY_KEYS.myRequests(user?.id, params?.status),
         queryFn: () => getMyCategoryRequest(params),
         enabled: !!user,
-        staleTime: 5 * 60 * 1000
     });
 }

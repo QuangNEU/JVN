@@ -5,6 +5,7 @@ from .models import Category,JobPost, SavedJob
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from resumes.models import Tag
+from notifications.services import  create_notification_service, create_bulk_notification_service
 from rest_framework.serializers import ValidationError
 from django.utils import timezone
 from . selectors import get_valid_leaf_categories
@@ -50,6 +51,13 @@ def deny_category_service(*,user:Account,category_id:int, reason: str):
     category.status = Category.Status.REJECTED
     category.rejected_reason = reason
     category.save(update_fields=['status', 'rejected_reason', 'updated_at'])
+    if category.created_by:
+        create_notification_service(
+            user= category.created_by,
+            message= f'Category {category.title} đã bị từ chối bởi admin do {category.rejected_reason}',
+            link='',
+            send_email= True                        
+        )
     return category
 
 def approve_category_service(*,user: Account,category_id:int):
@@ -59,6 +67,12 @@ def approve_category_service(*,user: Account,category_id:int):
     category.rejected_reason = None
     category.status = Category.Status.APPROVED
     category.save(update_fields=['status', 'rejected_reason', 'updated_at'])
+    if category.created_by:
+        create_notification_service(
+            user= category.created_by,
+            message= f'Category {category.title} đã được duyệt bởi admin',
+            link=''                        
+        )
     return category
 
 
@@ -98,6 +112,15 @@ def create_post_service(*, user: Account, data: dict):
     if category_ids:
         categories = get_valid_leaf_categories(category_ids)   # ← thay đoạn cũ
         job_post.category.set(categories)
+
+    create_bulk_notification_service(
+        filter_kwargs={
+            'jobseeker__following__company': company.pk
+        },
+        message=f'{company.account.name} mới đăng tin tuyển dụng',
+        link=f'/jobs/{job_post.id}'
+    )
+
     return job_post
 
 @transaction.atomic

@@ -17,7 +17,7 @@ export default function CompanyDetailPage() {
     const followCompany = useFollowCompany(id);
     const isFollowing = followingData?.is_following ?? false;
 
-    const { data: jobsData } = usePublicJobs({ keyword: company?.name, page: 1, page_size: 10 });
+    const { data: jobsData } = usePublicJobs({ company_id: company?.id, page: 1, page_size: 10 });
 
     if (isLoading) return <div className="py-16 text-center text-sm text-slate-400">Đang tải...</div>;
     if (isError || !company) return <div className="py-16 text-center text-sm text-red-500">Không tìm thấy công ty này.</div>;
