@@ -5,7 +5,9 @@ import {
     JobPostFormData,
     PaginatedResponse,
     JobPostListParams,
-    ExpiringJob
+    ExpiringJob,
+    RejectJobPostPayload,
+    JobPostReviewParams
 } from "../types/jobs";
 
 
@@ -39,4 +41,21 @@ export async function getJobPostDetail(id: number): Promise<JobPost> {
 export async function getExpiringJobs(): Promise<ExpiringJob[]> {
     const res = await axiosClient.get('/jobs/expiring-soon');
     return res.data;
+}
+
+export async function approveJobPost(id: number): Promise<JobPost> {
+    const response = await axiosClient.post(`/jobs/job-post/${id}/approve`);
+    return response.data
+}
+
+export async function rejectJobPost({ jobPostId, reason }: RejectJobPostPayload): Promise<JobPost> {
+    const response = await axiosClient.post(`/jobs/job-post/${jobPostId}/reject`, { reason });
+    return response.data
+}
+
+export async function getAdminJobPostReview(
+    params: JobPostReviewParams = {},
+): Promise<PaginatedResponse<JobPost>> {
+    const response = await axiosClient.get('/jobs/job-post/admin-review', { params });
+    return response.data
 }

@@ -19,6 +19,8 @@ import { JobPost } from '@/features/jobs/types/jobs';
 import JobListCard from '@/components/ui/JobListCard';
 import { FacebookIcon, LinkedinIcon } from '@/components/icons/icons';
 import ApplyJobModal from '@/components/ui/ApplyJobModal';
+import ReportButton from '@/features/reports/components/ReportButton';
+import { REPORT_TARGET_TYPE } from '@/features/reports/types/report';
 
 const typeLabels: Record<string, string> = {
     FULLTIME: 'Toàn thời gian', PARTTIME: 'Bán thời gian', HYBRID: 'Hỗn hợp', REMOTE: 'Từ xa',
@@ -341,11 +343,14 @@ export default function PublicJobDetailPage() {
                                     <button
                                         onClick={handleApplyClick}
                                         disabled={isApplied}
-                                        className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white ${isApplied ? 'cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'
+                                        className={`flex flex-1 mt-4 mb-4 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white ${isApplied ? 'cursor-not-allowed bg-slate-300' : 'bg-blue-600 hover:bg-blue-700'
                                             }`}
                                     >
                                         <Send className="h-4 w-4" /> {isApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                                     </button>
+                                    <div>
+                                        <ReportButton targetType={REPORT_TARGET_TYPE.JOB_POST} targetId={job.id} />
+                                    </div>
                                 </section>
                             </>
                         ) : (
@@ -365,7 +370,7 @@ export default function PublicJobDetailPage() {
                     <div className="space-y-4">
                         {/* Card công ty */}
                         <div className="rounded-2xl border border-slate-100 bg-white p-5">
-                            <div className="flex items-start gap-3">
+                            <div className="flex items-center gap-3">
                                 <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50">
                                     {job.company_logo ? (
                                         // eslint-disable-next-line @next/next/no-img-element
@@ -375,6 +380,11 @@ export default function PublicJobDetailPage() {
                                     )}
                                 </div>
                                 <h3 className="text-sm font-bold leading-snug text-slate-800">{job.company_name}</h3>
+                                {job.company_id && (
+                                    <div className='ml-auto'>
+                                        <ReportButton targetType={REPORT_TARGET_TYPE.COMPANY} targetId={job.company_id} />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mt-4 space-y-3 text-sm">

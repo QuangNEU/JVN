@@ -10,7 +10,9 @@ import JobPostFormModal from '@/components/ui/JobPostFormModal';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+    PENDING: { label: 'Chờ duyệt', className: 'bg-amber-50 text-amber-700' },
     PUBLISHED: { label: 'Đang tuyển', className: 'bg-emerald-50 text-emerald-700' },
+    REJECTED: { label: 'Đã từ chối', className: 'bg-red-50 text-red-700' },
     CLOSED: { label: 'Đã đóng', className: 'bg-slate-100 text-slate-500' },
 };
 
@@ -48,7 +50,9 @@ function isExpiringSoon(expirationDate: string | null) {
 
 const statusTabs: { label: string; value: JobStatusType | undefined }[] = [
     { label: 'Tất cả', value: undefined },
+    { label: 'Chờ duyệt', value: 'PENDING' },
     { label: 'Đang tuyển', value: 'PUBLISHED' },
+    { label: 'Đã từ chối', value: 'REJECTED' },
     { label: 'Đã đóng', value: 'CLOSED' },
 ];
 

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const djangoRes = await axios.get(
-            `${process.env.API_URL}/accounts/me/verification-status/`,
+            `${process.env.API_URL}/companies/me/verification-status/`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
         return NextResponse.json(djangoRes.data);

@@ -9,8 +9,7 @@ from core.pagnigation import StandardResultsPagination
 from .throttles import LoginRateThrottle
 from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
 from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout, send_email_verification_service, confirm_email_verification_service, submit_business_certificate, approve_business_certificate, reject_business_certificate
-from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector, get_my_verification_status_selector
-
+from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector
 # Create your views here.
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -211,8 +210,3 @@ class RejectBusinessCertView(APIView):
             'business_cert_status': company.business_cert_status,
         }, status=status.HTTP_200_OK)
     
-class MyVerificationStatusView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        data = get_my_verification_status_selector(user=request.user)
-        return Response(data, status=status.HTTP_200_OK)

@@ -14,7 +14,6 @@ urlpatterns = [
     path('follow/<int:company_id>/',views.FollowView.as_view(),name='follow'),
     path('follow/', views.MyFollowView.as_view()),
     path('follow/<int:company_id>/status/', views.CheckFollowingView.as_view(), name='check-following'),
-    path('me/verification-status/', views.MyVerificationStatusView.as_view(), name='my-verification-status'),
     path('email/send-verification/', views.SendEmailVerificationView.as_view(), name='send-email-verification'),
     path('email/confirm/', views.ConfirmEmailVerificationView.as_view(), name='confirm-email-verification'),
     path('business-cert/', views.BusinessCertListView.as_view(), name='business-cert-list'),  # đổi từ 'business-cert/pending/'

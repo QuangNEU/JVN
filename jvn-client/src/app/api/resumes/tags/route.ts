@@ -7,7 +7,7 @@ export async function GET() {
         return NextResponse.json(djangoRes.data);
     } catch (error: any) {
         return NextResponse.json(
-            { error: error.response?.data?.message || 'Failed to fetch tags' },
+            { error: error.response?.data?.error || 'Failed to fetch tags' },
             { status: error.response?.status || 500 }
         );
     }

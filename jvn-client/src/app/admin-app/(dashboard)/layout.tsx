@@ -17,7 +17,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     }, []);
 
     useEffect(() => {
-
         if (!isLoading && (!user || user.role !== 'ADMIN')) {
             router.replace('/login');
         }
@@ -32,9 +31,14 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     }
 
     return (
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex h-screen overflow-hidden bg-slate-50">
+
             <AdminSidebar />
-            <main className="flex-1 p-6 lg:p-8">{children}</main>
+
+            <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+                {children}
+            </main>
+
         </div>
     );
 }

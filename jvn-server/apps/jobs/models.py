@@ -21,7 +21,9 @@ class JobPost(models.Model):
     LEVEL_CHOICES = CV.LEVEL_CHOICES
     class STATUS(models.TextChoices):
         PUBLISH = "PUBLISHED","Dang mo",
-        CLOSED = "CLOSED",'Da dong'
+        CLOSED = "CLOSED",'Da dong',
+        PENDING = "PENDING", 'Dang cho duyet',
+        REJECTED = 'REJECTED', 'Da tu choi'
     
     class TYPE(models.TextChoices):
         FULLTIME = 'FULLTIME','Toan thoi gian',
@@ -34,7 +36,7 @@ class JobPost(models.Model):
     requirement = models.TextField()
     benefit = models.TextField(null=True,blank=True)
     type = models.CharField(max_length=50,choices=TYPE,default='FULLTIME')
-    status = models.CharField(max_length=50,choices=STATUS)
+    status = models.CharField(max_length=50,choices=STATUS, default=STATUS.PENDING)
     level = models.CharField(max_length=50,choices=LEVEL_CHOICES)
     experience_requirement = models.CharField(max_length=50)
     headcount = models.PositiveIntegerField(default=1)
@@ -51,6 +53,7 @@ class JobPost(models.Model):
     tags = models.ManyToManyField(Tag,related_name='job_posts')
     category = models.ManyToManyField(Category,related_name='job_category')
     view_count = models.PositiveIntegerField(default=0)
+    rejected_reason = models.TextField(null=True, blank=True)
     class Meta:
         ordering =['-created_at']
         indexes = [

@@ -2,12 +2,12 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
-from .serializers import ExpiringJobSerializer, JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer, CategoryReviewSerializer, CompanyCategorySerializer
+from .serializers import  RejectJobPostSerializer, JobPostUpdateSerializer, ExpiringJobSerializer, JobPostSerializer,CategorySerializer,JobPostCreateSerializer, SavedJobSerializer, CategoryCreateSerializer, CategoryReviewSerializer, CompanyCategorySerializer
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .models import Category
-from .services import deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
-from .selectors import get_expring_soon_jobs_selectors, get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
+from .services import reject_job_post_service, approve_job_post_service, deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
+from .selectors import get_admin_job_post_selector, get_expring_soon_jobs_selectors, get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
 # Create your views here.
 
 
@@ -90,7 +90,7 @@ class CompanyJobPostView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         job_post = create_post_service(user=request.user,data = data)
-        return Response(JobPostCreateSerializer(job_post).data,status=status.HTTP_201_CREATED)
+        return Response(JobPostSerializer(job_post).data,status=status.HTTP_201_CREATED)
     def get(self,request):
         status_query = request.query_params.get('status', None)
         my_posts = company_read_post_service(user = request.user, status_filter=status_query)
@@ -134,7 +134,7 @@ class JobPostDetailView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def patch(self, request, post_id):
-        serializer = JobPostCreateSerializer(data = request.data)
+        serializer = JobPostUpdateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         job_post = update_post_service(user=request.user, post_id=post_id, data=data)
@@ -172,3 +172,31 @@ class ExpiringJobsView(APIView):
         jobs = get_expring_soon_jobs_selectors(user=request.user)
         serializer = ExpiringJobSerializer(jobs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ApproveJobPostView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, job_post_id):
+        job_post = approve_job_post_service(user=request.user, job_post_id=job_post_id)
+        return Response(JobPostSerializer(job_post).data, status=status.HTTP_200_OK)
+
+
+class RejectJobPostView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, job_post_id):
+        serializer = RejectJobPostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        job_post = reject_job_post_service(
+            user=request.user, job_post_id=job_post_id, reason=serializer.validated_data['reason']
+        )
+        return Response(JobPostSerializer(job_post).data, status=status.HTTP_200_OK)
+
+
+class AdminJobPostReviewView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        status_query = request.query_params.get('status', None)
+        jobs = get_admin_job_post_selector(user=request.user, status_filter=status_query)
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(jobs, request)
+        serializer = JobPostSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)

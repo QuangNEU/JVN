@@ -65,3 +65,30 @@ def validate_file(file_obj):
         raise ValidationError({
             'file': 'Nội dung file không hợp lệ hoặc bị lỗi.'
         })
+    
+# jobs/validators.py (hoặc core/validators.py nếu muốn dùng chung sau này cho cả company description)
+SUSPICIOUS_KEYWORDS = [
+    'việc nhẹ lương cao', 'không cần kinh nghiệm thu nhập khủng',
+    'thu nhập khủng', 'kiếm tiền tại nhà', 'chuyển khoản trước',
+    # danh sách mở rộng dần theo thực tế, không cần đầy đủ ngay từ đầu
+]
+
+URL_PATTERN = re.compile(r'https?://\S+|www\.\S+')
+ALLOWED_DOMAINS = []  
+
+def check_job_content(title: str, description: str) -> tuple[bool, str | None]:
+    """Trả (is_suspicious, reason). Không raise — để service quyết định set PENDING hay auto-REJECTED."""
+    text = f"{title} {description}".lower()
+    
+    for kw in SUSPICIOUS_KEYWORDS:
+        if kw in text:
+            return True, f"Chứa từ khóa nghi ngờ: '{kw}'"
+    
+    urls = URL_PATTERN.findall(description)
+    if urls and not all(any(d in u for d in ALLOWED_DOMAINS) for u in urls):
+        return True, "Chứa liên kết ngoài không xác định"
+    
+    if len(description.strip()) < 50:
+        return True, "Mô tả công việc quá ngắn"
+    
+    return False, None

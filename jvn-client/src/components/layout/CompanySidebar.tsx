@@ -25,7 +25,7 @@ export default function CompanySidebar({
             )}
 
             <aside
-                className={`fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-slate-100 bg-white transition-transform lg:static lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] overflow-y-auto w-64 border-r border-slate-100 bg-white transition-transform lg:static lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="mb-5 border-b w-100% h-30px">

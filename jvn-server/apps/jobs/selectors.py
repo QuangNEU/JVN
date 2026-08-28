@@ -172,3 +172,10 @@ def get_expring_soon_jobs_selectors(*, user:Account, days: int=3):
         expiration_date__gte = today,
         expiration_date__lte = today + timedelta(days)
     ).order_by('expiration_date')[:5]
+
+def get_admin_job_post_selector(*, user: Account, status_filter=None):
+    have_role(user=user, role=Account.ROLE_CHOICES.ADMIN)
+    queryset = JobPost.objects.filter(is_deleted=False).prefetch_related('tags', 'category').order_by('-date_posted')
+    if status_filter:
+        queryset = queryset.filter(status=status_filter)
+    return queryset

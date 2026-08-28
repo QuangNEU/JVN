@@ -13,8 +13,10 @@ export const JOB_TYPE = {
 } as const
 
 export const JOB_STATUS = {
-    PUBLISHED: 'PUBLISHED',
-    CLOSED: 'CLOSED'
+    PUBLISH: 'PUBLISHED',
+    CLOSED: 'CLOSED',
+    PENDING: 'PENDING',
+    REJECTED: 'REJECTED'
 } as const
 
 export type JobLevelType = typeof JOB_LEVEL[keyof typeof JOB_LEVEL];
@@ -101,6 +103,7 @@ export interface JobPost {
     // company_website: string | null;
     category: Category[];
     tags: Tag[];
+    rejected_reason: string;
 }
 
 export interface JobPostFormData {
@@ -145,4 +148,15 @@ export interface ExpiringJob {
     title: string;
     expiration_date: string;
     headcount: number;
+}
+
+export interface RejectJobPostPayload {
+    jobPostId: number;
+    reason: string;
+}
+
+export interface JobPostReviewParams {
+    status?: JobStatusType;
+    page?: number;
+    page_size?: number;
 }

@@ -7,6 +7,8 @@ import { useCheckFollowing } from '@/features/follow/hooks/useCheckFollowing';
 import { useFollowCompany } from '@/features/follow/hooks/useFollowCompany';
 import { usePublicJobs } from '@/features/jobs/hooks/usePublicJob';
 import JobListCard from '@/components/ui/JobListCard';
+import ReportButton from '@/features/reports/components/ReportButton';
+import { REPORT_TARGET_TYPE } from '@/features/reports/types/report';
 
 export default function CompanyDetailPage() {
     const params = useParams();
@@ -45,14 +47,18 @@ export default function CompanyDetailPage() {
                                 </div>
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => followCompany.mutate()}
-                            disabled={followCompany.isPending}
-                            className={`shrink-0 rounded-full px-6 py-2.5 text-sm font-semibold disabled:opacity-60 ${isFollowing ? 'border border-slate-200 text-slate-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                        >
-                            {isFollowing ? 'Đang theo dõi' : 'Theo dõi công ty'}
-                        </button>
+                        <div className='flex flex-col space-y-4'>
+                            <button
+                                onClick={() => followCompany.mutate()}
+                                disabled={followCompany.isPending}
+                                className={`shrink-0 rounded-full px-6 py-2.5 text-sm font-semibold disabled:opacity-60 ${isFollowing ? 'border border-slate-200 text-slate-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                            >
+                                {isFollowing ? 'Đang theo dõi' : 'Theo dõi công ty'}
+                            </button>
+                            <div>
+                                <ReportButton targetType={REPORT_TARGET_TYPE.COMPANY} targetId={company.id} />
+                            </div>
+                        </div>
                     </div>
 
                     {company.description && (

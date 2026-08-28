@@ -55,7 +55,7 @@ class JobPostSerializer(serializers.ModelSerializer):
             'company_logo', 'company_headcount', 'company_industry',
             'level', 'type', 'status', 'experience_requirement', 'headcount',
             'salary_min', 'salary_max', 'currency', 'is_negotiable',
-            'date_posted', 'expiration_date', 'category', 'tags', 'company_id']
+            'date_posted', 'expiration_date', 'category', 'tags', 'company_id','rejected_reason']
         
 class JobPostCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
@@ -75,7 +75,7 @@ class JobPostCreateSerializer(serializers.Serializer):
     category_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
     def validate(self, data):
         if (data.get('salary_min') and data.get('salary_max') and data.get('salary_min') > data.get('salary_max')):
-            raise serializers.ValidationError({'error':'min salary can not be smaller than max salary'})
+            raise serializers.ValidationError({'salary_max':'min salary can not be smaller than max salary'})
         return data
     
 class SavedJobSerializer(serializers.ModelSerializer):
@@ -90,3 +90,29 @@ class ExpiringJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPost
         fields = ['id', 'title', 'expiration_date', 'headcount']
+
+class JobPostUpdateSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=200, required=False)
+    descriptions = serializers.CharField(required=False)
+    requirement = serializers.CharField(required=False)
+    benefit = serializers.CharField(required=False, allow_blank=True)
+    type = serializers.ChoiceField(choices=JobPost.TYPE, required=False)
+    level = serializers.ChoiceField(choices=CV.LEVEL_CHOICES, required=False)
+    experience_requirement = serializers.CharField(max_length=50, required=False)
+    headcount = serializers.IntegerField(min_value=1, required=False)
+    salary_min = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    salary_max = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    currency = serializers.CharField(max_length=10, required=False)
+    is_negotiable = serializers.BooleanField(required=False)
+    expiration_date = serializers.DateField(required=False, allow_null=True)
+    tag_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
+    category_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
+
+    def validate(self, data):
+        if (data.get('salary_min') and data.get('salary_max')
+                and data.get('salary_min') > data.get('salary_max')):
+            raise serializers.ValidationError({'salary_max': 'Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu'})
+        return data
+
+class RejectJobPostSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=True, allow_blank=False, max_length=1000)

@@ -35,9 +35,9 @@ def get_follow_company_selector(*, user:Account):
 def get_company_verification_level(*, company: Company) -> int:
     if not company.account.email_verified:
         return 0
-    if company.business_cert_status == Company.CertStatus.APPROVED:
-        return 2
-    return 1
+    if company.business_cert_status != Company.CertStatus.APPROVED:
+        return 1
+    return 2
 
 def get_business_cert_list_selector(*,user:Account, status_filter):
     if user.role != Account.ROLE_CHOICES.ADMIN:
@@ -46,13 +46,3 @@ def get_business_cert_list_selector(*,user:Account, status_filter):
     if status_filter:
         quert_set = quert_set.filter(business_cert_status = status_filter)
     return quert_set.exclude(business_cert_status=Company.CertStatus.NOT_SUBMITTED)
-
-def get_my_verification_status_selector(*, user: Account) -> dict:
-    have_role(user=user, role='company')
-    company = user.company
-    return {
-        'email_verified': user.email_verified,
-        'business_cert_status': company.business_cert_status,
-        'business_cert_rejected_reason': company.business_cert_rejected_reason,
-        'verification_level': get_company_verification_level(company=company),
-    }

@@ -4,7 +4,9 @@ from accounts.models import Company, Follow, Account, JobSeeker
 from jobs.models import JobPost, SavedJob
 from applications.models import Application
 from django.utils import timezone
+from accounts.selectors import get_company_verification_level
 from datetime import timedelta
+from reports.models import Report
 from core.permission import have_role
 
 
@@ -159,3 +161,25 @@ def get_job_conversion_selector(*, user:Account, min_age_days: int = 3):
     }
 
 
+def get_full_verification_level(*, company: Company) -> int:
+    base_level = get_company_verification_level(company=company)
+    if base_level < 2:
+        return base_level
+
+    has_unresolved_violation = Report.objects.filter(
+        Q(target_type=Report.TargetType.COMPANY, company=company) |
+        Q(target_type=Report.TargetType.JOB_POST, job_post__company=company),
+        status=Report.Status.RESOLVED,
+    ).exists()
+    return 2 if has_unresolved_violation else 3
+
+
+def get_my_verification_status_selector(*, user: Account) -> dict:
+    have_role(user=user, role=Account.ROLE_CHOICES.COMPANY)   # đã sửa bug case-sensitive
+    company = user.company
+    return {
+        'email_verified': user.email_verified,
+        'business_cert_status': company.business_cert_status,
+        'business_cert_rejected_reason': company.business_cert_rejected_reason,
+        'verification_level': get_full_verification_level(company=company),
+    }

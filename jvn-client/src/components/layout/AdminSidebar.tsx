@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, ListChecks, FileCheck2, LogOut } from 'lucide-react';
+import { LayoutDashboard, ListChecks, FileCheck2, LogOut, Briefcase, Flag } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const navItems = [
     { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Duyệt danh mục', href: '/categories', icon: ListChecks },
     { label: 'Duyệt giấy chứng nhận', href: '/business-certs', icon: FileCheck2 },
+    { label: 'Duyệt tin tuyển dụng', href: '/job-posts', icon: Briefcase },
+    { label: 'Xử lý báo cáo', href: '/reports', icon: Flag },
 ];
 
 export default function AdminSidebar() {
@@ -22,7 +24,7 @@ export default function AdminSidebar() {
     };
 
     return (
-        <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-slate-100 bg-white">
+        <aside className="flex overflow-y-auto h-screen w-64 shrink-0 flex-col border-r border-slate-100 bg-white">
             <div className="border-b border-slate-100 px-6 py-5">
                 <p className="text-sm font-bold text-slate-800">JVN Admin</p>
             </div>
