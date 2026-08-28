@@ -73,7 +73,7 @@ def company_read_post_service(*,user:Account, status_filter = None):
 
 def public_read_post_service(*, filters: dict = None):
     queryset = JobPost.objects.filter(
-        status='PUBLISHED', is_deleted=False
+        status='PUBLISHED', is_deleted=False, is_hidden_by_lock=False, 
     ).filter(
         Q(expiration_date__isnull=True) | Q(expiration_date__gt=timezone.localdate())
     ).select_related('company', 'company__account').prefetch_related('tags', 'category')

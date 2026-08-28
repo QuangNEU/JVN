@@ -156,7 +156,10 @@ REST_FRAMEWORK = {
         'anon': '30/minute',  
         'user': '100/minute', 
         'login': '5/minute',
-    }
+    },
+    'DEFAULT_PERMISSION_CLASSES': [
+        'core.permission.IsNotLocked',
+    ],
 }
 
 # Cấu hình thời hạn của Token (JWT)

@@ -1,12 +1,12 @@
 import os
 import uuid
 from django.db import transaction,IntegrityError
-from .models import Account,JobSeeker,Company,Follow
+from .models import Account,JobSeeker,Company,Follow, AccountLockHistory
 from .tasks import send_verification_email_task
 from notifications.services import create_notification_service
 from core.permission import have_role
 from core.validator import validate_file
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -306,4 +306,35 @@ def reject_business_certificate(*, user: Account, company_id, reason):
     )
     return company
 
-    
+def lock_seeker_service(*, admin_user: Account, target_account_id: int, reason: str):
+    if admin_user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionDenied({'detail': 'You dont have the permission to lock this account'})
+
+    target = get_object_or_404(Account, pk=target_account_id, role=Account.ROLE_CHOICES.SEEKER)
+    if target.is_locked:
+        raise ValidationError({'detail': 'This account had been locked'})
+
+    target.is_locked = True
+    target.save(update_fields=['is_locked'])
+
+    AccountLockHistory.objects.create(
+        account=target, action=AccountLockHistory.Action.LOCKED, reason=reason, performed_by=admin_user,
+    )
+    create_notification_service(
+        user=target, message=f"Tài khoản của bạn đã bị khóa: {reason}", link='/support', send_email=True,
+    )
+    return target
+
+
+def unlock_seeker_service(*, admin_user: Account, target_account_id: int):
+    if admin_user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionDenied({'detail': 'You dont have the permission to unlock this account'})
+
+    target = get_object_or_404(Account, pk=target_account_id, role=Account.ROLE_CHOICES.SEEKER, is_locked=True)
+    target.is_locked = False
+    target.save(update_fields=['is_locked'])
+
+    AccountLockHistory.objects.create(
+        account=target, action=AccountLockHistory.Action.UNLOCKED, reason='', performed_by=admin_user,
+    )
+    return target

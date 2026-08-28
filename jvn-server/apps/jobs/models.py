@@ -54,6 +54,7 @@ class JobPost(models.Model):
     category = models.ManyToManyField(Category,related_name='job_category')
     view_count = models.PositiveIntegerField(default=0)
     rejected_reason = models.TextField(null=True, blank=True)
+    is_hidden_by_lock = models.BooleanField(default=False)
     class Meta:
         ordering =['-created_at']
         indexes = [

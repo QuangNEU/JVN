@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password as django_validate_password
-from django.core.exceptions import ValidationError
 from core.validator import validate_strong_password,validate_tel, validate_html_tag
-from .models import Account, JobSeeker, Company, Follow
+from .models import Account, JobSeeker, Company, Follow, AccountLockHistory
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from core.constants import HEADCOUNT_CHOICES
 
 PUBLIC_ROLE_CHOICES = (
@@ -161,3 +161,29 @@ class CompanyCertReviewSerializer(serializers.ModelSerializer):
 class SubmitCertSerializer(serializers.Serializer):
     document = serializers.FileField()
 
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if self.user.is_locked:
+            raise serializers.ValidationError({'detail': 'Your account has been locked.'})
+        return data
+    
+
+class AccountLockHistorySerializer(serializers.ModelSerializer):
+    performed_by_email = serializers.CharField(source='performed_by.email', read_only=True, allow_null=True)
+
+    class Meta:
+        model = AccountLockHistory
+        fields = ['id', 'action', 'reason', 'performed_by_email', 'created_at']
+        read_only_fields = fields
+
+class LockAccountSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=True, allow_blank=False, max_length=1000)
+
+
+class AccountLockStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['id', 'email', 'name', 'role', 'is_locked']
+        read_only_fields = fields

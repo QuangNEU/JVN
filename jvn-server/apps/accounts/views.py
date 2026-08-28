@@ -7,8 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.pagnigation import StandardResultsPagination
 from .throttles import LoginRateThrottle
-from .serializers import SeekerDetailSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
-from .services import login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout, send_email_verification_service, confirm_email_verification_service, submit_business_certificate, approve_business_certificate, reject_business_certificate
+from .serializers import AccountLockStatusSerializer, LockAccountSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
+from .services import unlock_seeker_service, lock_seeker_service, login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout, send_email_verification_service, confirm_email_verification_service, submit_business_certificate, approve_business_certificate, reject_business_certificate
 from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector
 # Create your views here.
 class RegisterView(APIView):
@@ -210,3 +210,20 @@ class RejectBusinessCertView(APIView):
             'business_cert_status': company.business_cert_status,
         }, status=status.HTTP_200_OK)
     
+class LockSeekerView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, account_id):
+        serializer = LockAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        target = lock_seeker_service(
+            admin_user=request.user, target_account_id=account_id,
+            reason=serializer.validated_data['reason'],
+        )
+        return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)
+
+
+class UnlockSeekerView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, account_id):
+        target = unlock_seeker_service(admin_user=request.user, target_account_id=account_id)
+        return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)

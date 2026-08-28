@@ -6,8 +6,8 @@ from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .selectors import get_my_verification_status_selector, get_jobs_pending_review_selector, get_job_conversion_selector, get_system_overview_selector, get_application_status_breakdown_selector, get_featured_companies_selector, search_companies_selector, get_company_detail_selector, get_company_dashboard_summary_selector
 from .serializers import JobPendingReviewSerializer, JobConversionSerializer, SystemOverviewSerializer, ApplicationStatusBreakdownItemSerializer, FeaturedCompanySerializer, CompanyDetailSerializer, CompanyDashboardSummarySerializer
-
-
+from .services import lock_company_service, unlock_company_service
+from accounts.serializers import LockAccountSerializer, AccountLockStatusSerializer
 
 class FeaturedCompaniesView(APIView):
     permission_classes = [AllowAny]
@@ -81,3 +81,21 @@ class MyVerificationStatusView(APIView):
     def get(self, request):
         data = get_my_verification_status_selector(user=request.user)
         return Response(data, status=status.HTTP_200_OK)
+    
+class LockCompanyView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, account_id):
+        serializer = LockAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        target = lock_company_service(
+            admin_user=request.user, target_account_id=account_id,
+            reason=serializer.validated_data['reason'],
+        )
+        return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)
+
+
+class UnlockCompanyView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, account_id):
+        target = unlock_company_service(admin_user=request.user, target_account_id=account_id)
+        return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)

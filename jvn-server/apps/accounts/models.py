@@ -35,6 +35,7 @@ class Account(AbstractUser):
     tel = models.CharField(max_length = 15,null=True, blank=True)
     name = models.CharField(max_length= 255)
     email_verified = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default= False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -43,7 +44,19 @@ class Account(AbstractUser):
 
     def __str__(self):
         return f"{self.email}-{self.role}"
+
+class AccountLockHistory(models.Model):
+    class Action(models.TextChoices):
+        LOCKED = 'LOCKED', 'Đã khoá'
+        UNLOCKED = 'UNLOCKED', 'Đã mở khoá'
     
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='lock_history')
+    action = models.CharField(max_length=20, choices= Action.choices)
+    reason = models.CharField(blank= True)
+    performed_by = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class JobSeeker(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE,primary_key=True)
     github_urls = models.CharField(max_length=100,blank=True,null=True)
