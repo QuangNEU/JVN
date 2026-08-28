@@ -58,7 +58,8 @@ def login_service(*,email,password):
         raise ValueError('Tai khoan khong ton tai')
     if not account.is_active:
         raise ValueError('Tai khoan da bi khoa')
-    
+    if account.is_locked :
+        raise ValueError('Tai khoan da bi khoa boi quan tri vien')
     return account
 
 @transaction.atomic

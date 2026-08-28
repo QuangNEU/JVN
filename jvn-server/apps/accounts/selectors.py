@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
-from .models import Account, Company, Follow
+from .models import Account, Company, Follow, AccountLockHistory
 from core.permission import have_role
+from rest_framework.exceptions import PermissionDenied
 
 
 def get_profile_detail_selector(*, account_id: int):
@@ -41,8 +42,27 @@ def get_company_verification_level(*, company: Company) -> int:
 
 def get_business_cert_list_selector(*,user:Account, status_filter):
     if user.role != Account.ROLE_CHOICES.ADMIN:
-        return PermissionError({'error':'You dont have the permission to read business cert'})
+        return PermissionDenied({'detail':'You dont have the permission to read business cert'})
     quert_set = Company.objects.select_related('account')
     if status_filter:
         quert_set = quert_set.filter(business_cert_status = status_filter)
     return quert_set.exclude(business_cert_status=Company.CertStatus.NOT_SUBMITTED)
+
+
+def get_admin_account_list_selector(*,user: Account, role_filter = None, is_locked_filter = None):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionDenied({'detail':'You dont have the permission to get account list'})
+    
+    query_set = Account.objects.exclude(role = Account.ROLE_CHOICES.ADMIN).order_by('-date_joined')
+    if role_filter:
+        query_set = query_set.filter(role = role_filter)
+    if is_locked_filter:
+        query_set = query_set.filter(is_locked = is_locked_filter)
+    return query_set
+
+
+def get_account_lock_history_selector(*, user: Account, account_id: int):
+    if user.role != Account.ROLE_CHOICES.ADMIN:
+        raise PermissionDenied({'detail': 'You dont have the permission'})
+
+    return AccountLockHistory.objects.filter(account_id=account_id).select_related('performed_by').order_by('-created_at')

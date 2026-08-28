@@ -178,6 +178,12 @@ class AccountLockHistorySerializer(serializers.ModelSerializer):
         fields = ['id', 'action', 'reason', 'performed_by_email', 'created_at']
         read_only_fields = fields
 
+class AccountAdminListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['id', 'email', 'name', 'role', 'is_locked', 'date_joined']
+        read_only_fields = fields
+
 class LockAccountSerializer(serializers.Serializer):
     reason = serializers.CharField(required=True, allow_blank=False, max_length=1000)
 

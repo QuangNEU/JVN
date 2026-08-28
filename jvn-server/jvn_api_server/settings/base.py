@@ -158,6 +158,7 @@ REST_FRAMEWORK = {
         'login': '5/minute',
     },
     'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
         'core.permission.IsNotLocked',
     ],
 }

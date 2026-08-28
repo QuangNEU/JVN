@@ -7,9 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from core.pagnigation import StandardResultsPagination
 from .throttles import LoginRateThrottle
-from .serializers import AccountLockStatusSerializer, LockAccountSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
+from .serializers import AccountLockHistorySerializer, AccountAdminListSerializer, AccountLockStatusSerializer, LockAccountSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
 from .services import unlock_seeker_service, lock_seeker_service, login_service,follow_service,create_user_service,google_login_service,reset_password_service,forgot_password_service,update_my_detail_service,change_password,logout, send_email_verification_service, confirm_email_verification_service, submit_business_certificate, approve_business_certificate, reject_business_certificate
-from .selectors import get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector
+from .selectors import get_account_lock_history_selector,get_admin_account_list_selector ,get_profile_detail_selector, get_is_following, get_company_selector, get_follow_company_selector, get_business_cert_list_selector
 # Create your views here.
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -227,3 +227,28 @@ class UnlockSeekerView(APIView):
     def post(self, request, account_id):
         target = unlock_seeker_service(admin_user=request.user, target_account_id=account_id)
         return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)
+    
+class AdminAccountListView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        role_query = request.query_params.get('role', None)
+        locked_query = request.query_params.get('is_locked', None)
+        is_locked_filter = None
+        if locked_query is not None:
+            is_locked_filter = locked_query.lower() == 'true'
+
+        accounts = get_admin_account_list_selector(
+            user=request.user, role_filter=role_query, is_locked_filter=is_locked_filter,
+        )
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(accounts, request)
+        serializer = AccountAdminListSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+class AccountLockHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, account_id):
+        history = get_account_lock_history_selector(user=request.user, account_id=account_id)
+        serializer = AccountLockHistorySerializer(history, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
