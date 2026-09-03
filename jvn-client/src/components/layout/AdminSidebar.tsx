@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, ListChecks, FileCheck2, LogOut, Briefcase, Flag } from 'lucide-react';
+import { LayoutDashboard, ListChecks, FileCheck2, LogOut, Briefcase, Flag, Users } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
     { label: 'Duyệt giấy chứng nhận', href: '/business-certs', icon: FileCheck2 },
     { label: 'Duyệt tin tuyển dụng', href: '/job-posts', icon: Briefcase },
     { label: 'Xử lý báo cáo', href: '/reports', icon: Flag },
+    { label: 'Quản lý tài khoản', href: '/accounts', icon: Users },
 ];
 
 export default function AdminSidebar() {

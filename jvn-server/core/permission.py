@@ -22,10 +22,10 @@ def have_role(*,user: Account,role:str):
         raise PermissionDenied({'detail': 'Khong co quyen han'})
     return True
 
-class IsNotLocked(BasePermission):
-    message = 'Tài khoản của bạn đã bị khóa.'
-
+class IsAuthenticatedAndNotLocked(BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
-            return True   
-        return not request.user.is_locked
+            return False
+        if request.user.is_locked:
+            raise PermissionDenied({'detail': 'Tài khoản của bạn đã bị khóa.', 'code': 'account_locked'})
+        return True

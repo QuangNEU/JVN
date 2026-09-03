@@ -3,13 +3,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import Http404
+from core.permission import IsAuthenticatedAndNotLocked
 from core.pagnigation import StandardResultsPagination
 from rest_framework import status
 from .services import create_report_services, dismiss_report_service, resolve_report_service
 from .selectors import get_admin_report_selector
 
 class CreateReportView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request):
         serializer = CreateReportSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -18,7 +19,7 @@ class CreateReportView(APIView):
 
 
 class AdminReportListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         status_query = request.query_params.get('status', None)
         reports = get_admin_report_selector(status_filter=status_query)
@@ -29,7 +30,7 @@ class AdminReportListView(APIView):
 
 
 class ResolveReportView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, report_id):
         try:
             serializer = ResolveReportSerializer(data=request.data)
@@ -47,7 +48,7 @@ class ResolveReportView(APIView):
 
 
 class DismissReportView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, report_id):
         try: 
             serializer = DismissReportSerializer(data=request.data)

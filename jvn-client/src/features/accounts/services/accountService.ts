@@ -1,4 +1,5 @@
-import { ForgotPasswordPayLoad, GoogleLoginPayLoad, LoginPayLoad, LoginResponse, RegisterPayLoad, ResetPasswordPayLoad } from "@/features/accounts/types/account";
+import { ForgotPasswordPayLoad, GoogleLoginPayLoad, LoginPayLoad, LoginResponse, RegisterPayLoad, ResetPasswordPayLoad, AdminAccountItem, AdminAccountListParams, AccountLockHistoryItem } from "@/features/accounts/types/account";
+import { PaginatedResponse } from "@/features/jobs/types/jobs";
 import axiosClient from "@/services/axios";
 
 export async function login(payload: LoginPayLoad): Promise<LoginResponse> {
@@ -43,4 +44,36 @@ export async function resetPassword(payload: ResetPasswordPayLoad) {
         payload
     )
     return response
+}
+
+export async function getAdminAccountList(
+    params: AdminAccountListParams = {},
+): Promise<PaginatedResponse<AdminAccountItem>> {
+    const response = await axiosClient.get('/accounts/admin-list', { params });
+    return response.data;
+}
+
+export async function getAccountLockHistory(accountId: number): Promise<AccountLockHistoryItem[]> {
+    const response = await axiosClient.get(`/accounts/${accountId}/lock-history`);
+    return response.data;
+}
+
+export async function lockSeeker(accountId: number, reason: string): Promise<AdminAccountItem> {
+    const response = await axiosClient.post(`/accounts/${accountId}/lock-seeker`, { reason });
+    return response.data;
+}
+
+export async function unlockSeeker(accountId: number): Promise<AdminAccountItem> {
+    const response = await axiosClient.post(`/accounts/${accountId}/unlock-seeker`);
+    return response.data;
+}
+
+export async function lockCompany(accountId: number, reason: string): Promise<AdminAccountItem> {
+    const response = await axiosClient.post(`/companies/${accountId}/lock`, { reason });
+    return response.data;
+}
+
+export async function unlockCompany(accountId: number): Promise<AdminAccountItem> {
+    const response = await axiosClient.post(`/companies/${accountId}/unlock`);
+    return response.data;
 }

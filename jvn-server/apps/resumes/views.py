@@ -4,13 +4,14 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from core.permission import IsAuthenticatedAndNotLocked
 from .serializers import TagSerializer,CVCreateSerializer,CVSerializer,CVUpdateSerializer
 from .selectors import get_cv_list_service,get_cv_selector,get_tag
 from .services import create_cv_service,delete_cv_service,set_default_service,update_cv_service,public_cv_service
 # Create your views here.
 
 class CVManageView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self,request):
         serializer = CVCreateSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
@@ -27,7 +28,7 @@ class CVManageView(APIView):
     
     
 class CVDetailView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def get(self,request,cv_id):
         cv = get_cv_selector(user=request.user,cv_id=cv_id)
         serialize = CVSerializer(cv)
@@ -40,7 +41,7 @@ class CVDetailView(APIView):
         return Response({'message':'Xoa thanh cong'},status=status.HTTP_200_OK)
     
 class CVSetDefaultView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def post(self, request, cv_id):
         cv = set_default_service(user=request.user,cv_id= cv_id)
         return Response({
@@ -50,7 +51,7 @@ class CVSetDefaultView(APIView):
         },status=status.HTTP_200_OK)
     
 class CVUpdateView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def patch(self,request,cv_id):
         serializer = CVUpdateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
@@ -59,7 +60,7 @@ class CVUpdateView(APIView):
         return Response({'message':'Cap nhat cv thanh cong'},status=status.HTTP_200_OK)
     
 class CVPublicView(APIView):
-    permission_classes= [IsAuthenticated]
+    permission_classes= [IsAuthenticatedAndNotLocked]
     def post(self,request,cv_id):
         cv = public_cv_service(user=request.user,cv_id=cv_id)
         status_text = "công khai" if cv.is_public else "ẩn"

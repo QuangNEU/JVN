@@ -30,6 +30,15 @@ axiosClient.interceptors.response.use(
         const excludedUrls = ['/auth/login', '/auth/refresh', '/auth/register'];
         const isExcluded = excludedUrls.some((url) => originalRequest.url?.includes(url));
 
+        const errorCode = error.response?.data?.code;
+        if (errorCode === 'account_locked') {
+            try {
+                await axiosClient.post('/auth/logout');
+            } catch { }
+            window.location.href = '/login?reason=locked';
+            return Promise.reject(error);
+        }
+
         if (error.response?.status === 401 && !originalRequest._retry && !isExcluded) {
             if (isRefreshing) {
                 // đang refresh rồi, xếp hàng đợi thay vì gọi refresh nhiều lần cùng lúc

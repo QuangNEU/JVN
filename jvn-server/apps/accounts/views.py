@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from core.permission import IsAuthenticatedAndNotLocked
 from core.pagnigation import StandardResultsPagination
 from .throttles import LoginRateThrottle
 from .serializers import AccountLockHistorySerializer, AccountAdminListSerializer, AccountLockStatusSerializer, LockAccountSerializer,LoginSerializer,LogoutSerializer,RegisterSerializer,GoogleLoginSerializer,UpdateDetailSerializer,AccountDetailSerializer,CompanyDetailSerializer,ResetPasswordSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, FollowSerializer, SubmitCertSerializer, CompanyCertReviewSerializer
@@ -62,7 +63,7 @@ class LoginView(APIView):
         },status=status.HTTP_200_OK)
 
 class ChangPasswordView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self,request):
         serializer = ChangePasswordSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
@@ -72,7 +73,7 @@ class ChangPasswordView(APIView):
         },status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def post(self,request):
         serializer = LogoutSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
@@ -109,7 +110,7 @@ class ResetPasswordView(APIView):
         return Response({'message':'Da thay doi mat khau thanh cong'},status=status.HTTP_200_OK)
 
 class MyDetailView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def get(self,request):
         account = request.user
         serializer = AccountDetailSerializer(account)
@@ -124,7 +125,7 @@ class MyDetailView(APIView):
         return Response(AccountDetailSerializer(updated_account).data,status=status.HTTP_200_OK)
 
 class FollowView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def post(self, request, company_id):
         result = follow_service(
             user=request.user,
@@ -133,7 +134,7 @@ class FollowView(APIView):
         return Response(result,status=status.HTTP_200_OK)
 
 class CheckFollowingView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def get(self, request, company_id):
         is_following = get_is_following(
             user= request.user,
@@ -142,7 +143,7 @@ class CheckFollowingView(APIView):
         return Response({'is_following': is_following}, status= status.HTTP_200_OK)
     
 class MyFollowView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         followed_company = get_follow_company_selector(user= request.user)
         paginator = StandardResultsPagination()
@@ -151,7 +152,7 @@ class MyFollowView(APIView):
         return paginator.get_paginated_response(serializer.data)
     
 class SendEmailVerificationView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request):
         result = send_email_verification_service(user= request.user)
         return Response(result, status= status.HTTP_200_OK)
@@ -166,7 +167,7 @@ class ConfirmEmailVerificationView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 class SubmitBusinessCertificationView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     parser_classes = [MultiPartParser, FormParser]
     def post(self, request):
         serializer = SubmitCertSerializer(data = request.data)
@@ -179,7 +180,7 @@ class SubmitBusinessCertificationView(APIView):
         }, status=status.HTTP_200_OK)
     
 class BusinessCertListView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
 
     def get(self, request):
         status_filter = request.query_params.get('status')
@@ -190,7 +191,7 @@ class BusinessCertListView(APIView):
         return paginator.get_paginated_response(serializer.data)
     
 class  ApproveCertView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
 
     def post(self, request, company_id):
         company = approve_business_certificate(user= request.user, company_id=company_id)
@@ -200,7 +201,7 @@ class  ApproveCertView(APIView):
         }, status=status.HTTP_200_OK)
     
 class RejectBusinessCertView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
 
     def post(self, request, company_id):
         reason = request.data.get('reason', '')
@@ -211,7 +212,7 @@ class RejectBusinessCertView(APIView):
         }, status=status.HTTP_200_OK)
     
 class LockSeekerView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, account_id):
         serializer = LockAccountSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -223,13 +224,13 @@ class LockSeekerView(APIView):
 
 
 class UnlockSeekerView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, account_id):
         target = unlock_seeker_service(admin_user=request.user, target_account_id=account_id)
         return Response(AccountLockStatusSerializer(target).data, status=status.HTTP_200_OK)
     
 class AdminAccountListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         role_query = request.query_params.get('role', None)
         locked_query = request.query_params.get('is_locked', None)
@@ -247,7 +248,7 @@ class AdminAccountListView(APIView):
 
 
 class AccountLockHistoryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request, account_id):
         history = get_account_lock_history_selector(user=request.user, account_id=account_id)
         serializer = AccountLockHistorySerializer(history, many=True)

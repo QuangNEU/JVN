@@ -25,6 +25,9 @@ export interface Report {
     admin_note: string | null;
     created_at: string;
     reviewed_at: string | null;
+    target_account_id: number | null;
+    target_account_is_locked: boolean | null;
+    target_company_name: string | null
 }
 
 export interface CreateReportPayload {

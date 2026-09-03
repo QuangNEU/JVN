@@ -70,3 +70,32 @@ export interface ResetPasswordPayLoad {
     new_password: string;
     confirm_new_password: string;
 }
+
+export interface AdminAccountItem {
+    id: number;
+    email: string;
+    name: string;
+    role: Role;
+    is_locked: boolean;
+    date_joined: string;
+}
+
+export interface AccountLockHistoryItem {
+    id: number;
+    action: 'LOCKED' | 'UNLOCKED';
+    reason: string;
+    performed_by_email: string | null;
+    created_at: string;
+}
+
+export interface LockAccountPayload {
+    accountId: number;
+    reason: string;
+}
+
+export interface AdminAccountListParams {
+    role?: Role;
+    is_locked?: boolean;
+    page?: number;
+    page_size?: number;
+}

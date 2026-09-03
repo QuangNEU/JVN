@@ -6,13 +6,14 @@ from .serializers import  RejectJobPostSerializer, JobPostUpdateSerializer, Expi
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .models import Category
+from core.permission import IsAuthenticatedAndNotLocked
 from .services import reject_job_post_service, approve_job_post_service, deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
 from .selectors import get_admin_job_post_selector, get_expring_soon_jobs_selectors, get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
 # Create your views here.
 
 
 class CategoryCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request):
         serializer = CategoryCreateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
@@ -29,7 +30,7 @@ class CategoryCreateView(APIView):
         },status=status.HTTP_201_CREATED)
 
 class CategoryGetCompanyListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         status_query = request.query_params.get('status')
         category = get_my_category_requests_selector(user= request.user, status_filter= status_query)
@@ -47,7 +48,7 @@ class CategoryGetApprovedView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class CategoryGetAdminView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self,request):
         status_query = request.query_params.get('status')
         categories = get_admin_category_service(user=request.user, status_filter= status_query)
@@ -57,7 +58,7 @@ class CategoryGetAdminView(APIView):
         return paginator.get_paginated_response(serializer.data)
     
 class DenyCategoryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self,request,category_id):
         data = CategoryReviewSerializer(data = request.data)
         data.is_valid(raise_exception=True)
@@ -67,14 +68,14 @@ class DenyCategoryView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
 class ApproveCategoryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self,request,category_id):
         approved_category = approve_category_service(user=request.user,category_id=category_id)
         serializer = CompanyCategorySerializer(approved_category) 
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class ResubmitCategoryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def patch(self, request, category_id):
         data = CategoryCreateSerializer(data = request.data)
         data.is_valid(raise_exception=True)
@@ -84,7 +85,7 @@ class ResubmitCategoryView(APIView):
         return Response(serialize.data, status=status.HTTP_200_OK)
 
 class CompanyJobPostView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request):
         serializer = JobPostCreateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
@@ -126,7 +127,7 @@ class JobPostDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAuthenticated()]
+        return [IsAuthenticatedAndNotLocked()]
 
     def get(self, request, post_id):
         job_post = get_post_detail_selector(user= request.user, post_id=post_id)
@@ -145,13 +146,13 @@ class JobPostDetailView(APIView):
         return Response({'message':'Delete Successfully'},status=status.HTTP_200_OK)
     
 class SaveJobView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticatedAndNotLocked]
     def post(self, request, job_post_id):
         result = save_job_service(user= request.user, job_post_id=job_post_id)
         return Response(result, status= status.HTTP_200_OK)
     
 class MySavedJobView(APIView):
-    permission_classes= [IsAuthenticated]
+    permission_classes= [IsAuthenticatedAndNotLocked]
     def get(self, request):
         saved_job = get_saved_job_selector(user = request.user)
         paginator = StandardResultsPagination()
@@ -167,21 +168,21 @@ class CheckSavedJobView(APIView):
         return Response({'is_saved': is_saved}, status=status.HTTP_200_OK)
 
 class ExpiringJobsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         jobs = get_expring_soon_jobs_selectors(user=request.user)
         serializer = ExpiringJobSerializer(jobs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class ApproveJobPostView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, job_post_id):
         job_post = approve_job_post_service(user=request.user, job_post_id=job_post_id)
         return Response(JobPostSerializer(job_post).data, status=status.HTTP_200_OK)
 
 
 class RejectJobPostView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request, job_post_id):
         serializer = RejectJobPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -192,7 +193,7 @@ class RejectJobPostView(APIView):
 
 
 class AdminJobPostReviewView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         status_query = request.query_params.get('status', None)
         jobs = get_admin_job_post_selector(user=request.user, status_filter=status_query)
