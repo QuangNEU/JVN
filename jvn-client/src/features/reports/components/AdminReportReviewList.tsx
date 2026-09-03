@@ -5,6 +5,7 @@ import { useAdminReports, useResolveReport, useDismissReport } from '../hooks/us
 import { ReportStatusType, REPORT_STATUS, REPORT_TARGET_TYPE, Report } from '../types/report';
 import { useLockAccount, useUnlockAccount } from '@/features/accounts/hooks/useAccountLock';
 import { Role } from '@/features/accounts/types/account';
+import { useQueryClient } from '@tanstack/react-query';
 
 const TABS: { label: string; value: ReportStatusType }[] = [
     { label: 'Chờ xử lý', value: REPORT_STATUS.PENDING },
@@ -25,8 +26,8 @@ export default function AdminReportReviewList() {
     const [note, setNote] = useState('');
     const [lockTarget, setLockTarget] = useState<Report | null>(null);
     const [lockReason, setLockReason] = useState('');
-
-    const { data, isLoading } = useAdminReports({ status: activeTab, page_size: 20 });
+    const queryClient = useQueryClient();
+    const { data, isLoading, refetch } = useAdminReports({ status: activeTab, page_size: 20 });
     const resolveMutation = useResolveReport();
     const dismissMutation = useDismissReport();
     const lockMutation = useLockAccount();
@@ -59,13 +60,23 @@ export default function AdminReportReviewList() {
         if (!lockTarget?.target_account_id || !lockReason.trim()) return;
         lockMutation.mutate(
             { account: { id: lockTarget.target_account_id, role: Role.COMPANY } as any, reason: lockReason },
-            { onSuccess: () => { setLockTarget(null); setLockReason(''); } }
+            {
+                onSuccess: () => {
+                    setLockTarget(null);
+                    setLockReason('');
+                    refetch();
+                }
+            }
         );
     };
 
     const handleUnlock = (report: Report) => {
         if (!report.target_account_id) return;
-        unlockMutation.mutate({ id: report.target_account_id, role: Role.COMPANY } as any);
+        unlockMutation.mutate({ id: report.target_account_id, role: Role.COMPANY } as any, {
+            onSuccess: () => {
+                refetch()
+            }
+        });
     };
 
     return (

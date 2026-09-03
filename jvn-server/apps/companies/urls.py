@@ -11,4 +11,6 @@ urlpatterns = [
     path('job-conversion/', views.JobConversionView.as_view(), name='job-conversion'),
     path('jobs-pending-review/', views.JobsPendingReviewView.as_view(), name='jobs-pending-review'),
     path('me/verification-status/', views.MyVerificationStatusView.as_view(), name='my-verification-status'),
+    path('<int:account_id>/lock-company/', views.LockCompanyView.as_view(),),
+    path('<int:account_id>/unlock-company/',views.UnlockCompanyView.as_view())
 ]

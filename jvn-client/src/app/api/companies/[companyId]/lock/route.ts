@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     try {
         const djangoRes = await axios.post(
-            `${process.env.API_URL}/accounts/${companyId}/lock-company/`,
+            `${process.env.API_URL}/companies/${companyId}/lock-company/`,
             body,
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
