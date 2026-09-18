@@ -211,6 +211,15 @@ MEDIA_URL = '/JVN/'
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 # CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
 CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
 
 SEEKER_FRONTEND_URL = os.environ.get('SEEKER_FRONTEND_URL', 'http://jvn.com')
 EMPLOYER_FRONTEND_URL = os.environ.get('EMPLOYER_FRONTEND_URL', 'http://tuyendung.jvn.com')

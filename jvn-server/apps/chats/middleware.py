@@ -1,30 +1,33 @@
 from channels.middleware import BaseMiddleware
 from channels.db import database_sync_to_async
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth.models import AnonymousUser
-from http.cookies import SimpleCookie
+from django.core.cache import cache
+from urllib.parse import parse_qs
+
 
 @database_sync_to_async
-def get_user_from_token(token_str):
+def get_user_from_ticket(ticket):
     from accounts.models import Account
-    try:
-        accessToken =AccessToken(token_str)
-        user_id = accessToken['user_id']
-        return Account.objects.get(pk =user_id)
-    except (TokenError, Account.DoesNotExist):
+    user_id = cache.get(f'ws_ticket:{ticket}')
+    if user_id is None:
         return AnonymousUser()
-    
+
+    cache.delete(f'ws_ticket:{ticket}')  
+
+    try:
+        return Account.objects.get(pk=user_id)
+    except Account.DoesNotExist:
+        return AnonymousUser()
+
+
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
-        headers = dict(scope['headers'])
-        cookie_header = headers.get(b'cookie', b'').decode()
-        cookies = SimpleCookie()
-        cookies.load(cookie_header)
+        query_string = scope.get('query_string', b'').decode()
+        query_params = parse_qs(query_string)
+        ticket = query_params.get('ticket', [None])[0]
 
-        access_token_cookie = cookies.get('accessToken')
-        if access_token_cookie:
-            scope['user'] = await get_user_from_token(access_token_cookie.value)
+        if ticket:
+            scope['user'] = await get_user_from_ticket(ticket)
         else:
             scope['user'] = AnonymousUser()
 

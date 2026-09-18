@@ -9,6 +9,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+import secrets
+from django.core.cache import cache
+from accounts.models import Account
 
 def generate_direct_hash(user_id_1: int, user_id_2:int):
     sort_ids = sorted([user_id_1,user_id_2])
@@ -114,3 +117,7 @@ def send_message_service(*, user: Account, conversation_id, content):
         )
     return message
 
+def create_ws_ticket_service(*, user: Account):
+    ticket = secrets.token_urlsafe(32)
+    cache.set(f'ws_ticket:{ticket}', user.id, timeout=10)
+    return ticket

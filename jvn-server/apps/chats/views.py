@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import GroupConversationInputSerializer, GroupConversationResponseSerializer, ConversationListItemSerializer, MessageInputSerializer, MessageSenderSerializer, MessageResponseSerializer, DirectConversationInputSerializer, DirectConversationResponseSerializer
-from .services import get_or_create_direct_conversation_service, send_message_service, create_group_conversation_service
+from .services import get_or_create_direct_conversation_service, send_message_service, create_group_conversation_service, create_ws_ticket_service
 from .selectors import get_conversation_messages_selector, get_my_conversations_selector
 from core.permission import IsAuthenticatedAndNotLocked
 from core.pagnigation import StandardResultsPagination
@@ -84,3 +84,10 @@ class GetConversationList(APIView):
             'has_more': has_more,
             'next_cursor': next_cursor,
         }, status=status.HTTP_200_OK)
+    
+class WsTicketView(APIView):
+    permission_classes = [IsAuthenticatedAndNotLocked]
+
+    def get(self, request):
+        ticket = create_ws_ticket_service(user=request.user)
+        return Response({'ticket': ticket}, status=status.HTTP_200_OK)
