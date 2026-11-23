@@ -1,29 +1,37 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from accounts.models import Account
 from jobs.models import JobPost
+from resumes.models import CV
 from notifications.services import create_notification_service
 from core.permission import have_role, get_owned_or_403
 from .models import Application
-from django.shortcuts import get_object_or_404
 from.tasks import send_application_status_email_task
 
 @transaction.atomic
 def apply_job_services(*,user:Account,job_post_id:int, data:dict):
     have_role(user=user,role='jobseeker')
     job_seeker = user.jobseeker
-    job_post = get_object_or_404(JobPost, pk=job_post_id)
+    job_post = get_object_or_404(JobPost, pk=job_post_id, is_deleted=False)
     if(job_post.status != JobPost.STATUS.PUBLISH):
         raise PermissionDenied({'detail': 'You dont have permission to access this post'})
     
+    if job_post.expiration_date and job_post.expiration_date < timezone.localdate():
+        raise ValidationError({'detail': 'This job post has expired.'})
+
+    cv = get_object_or_404(CV, pk=data.get('cv_id'))
+    if cv.job_seeker != job_seeker:
+        raise PermissionDenied({'detail': 'You dont have permission to use this CV.'})
+
     if Application.objects.filter(applicant=job_seeker,job_post = job_post).exists():
         raise ValidationError({'detail': 'You have applied this job.'})
     
     application = Application.objects.create(
         applicant=job_seeker,
         job_post=job_post,
-        cv_id=data.get('cv_id'), 
+        cv=cv, 
         cover_letter=data.get('cover_letter', '')
     )
     return application
