@@ -56,13 +56,10 @@ def update_application_status(*, user: Account,data: dict, application_id):
     notification_message = get_application_status_message(status_val, job_title)
 
     create_notification_service(
-        user= application.applicant.account,
-        data={
-            'message': notification_message,
-            'link': f'/jobs/{application.job_post.id}', 
-            'is_read': False
-        },
-        send_email=  False
+        user=application.applicant.account,
+        message=notification_message,
+        link=f'/jobs/{application.job_post.id}',
+        send_email=False
     )
 
     transaction.on_commit(lambda: send_application_status_email_task.delay(application.id))

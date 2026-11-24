@@ -17,7 +17,9 @@ def create_category_service(*, user: Account, data: dict):
     if user.role == Account.ROLE_CHOICES.COMPANY:
         company = user.company
         if get_company_verification_level(company=company) < 2:
-            raise PermissionDenied({'detail': '...'})
+            raise PermissionDenied({
+                'detail': 'Vui lòng xác thực email và chứng nhận doanh nghiệp để tạo danh mục.'
+            })
         status = Category.Status.PENDING
     elif user.role == Account.ROLE_CHOICES.ADMIN:
         status = Category.Status.APPROVED

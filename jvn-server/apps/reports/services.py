@@ -45,6 +45,7 @@ def _finalize_report_service(*, admin_user, report_id: int, new_status: str, adm
     )
     report.status = new_status
     report.admin_note = admin_note
+    report.reviewed_at = timezone.now()
     report.save(update_fields=['status', 'admin_note', 'reviewed_at'])
     report.refresh_from_db()
     return report

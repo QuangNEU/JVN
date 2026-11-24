@@ -162,7 +162,7 @@ class ConfirmEmailVerificationView(APIView):
     def post(self,request):
         token = request.data.get('token')
         if not token:
-            return Response({"error":"Verify token is missing"})
+            return Response({"error":"Verify token is missing"}, status=status.HTTP_400_BAD_REQUEST)
         result = confirm_email_verification_service(token=token)
         return Response(result, status=status.HTTP_200_OK)
 

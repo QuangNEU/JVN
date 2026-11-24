@@ -22,7 +22,7 @@ class AdminReportListView(APIView):
     permission_classes = [IsAuthenticatedAndNotLocked]
     def get(self, request):
         status_query = request.query_params.get('status', None)
-        reports = get_admin_report_selector(status_filter=status_query)
+        reports = get_admin_report_selector(user=request.user, status_filter=status_query)
         paginator = StandardResultsPagination()
         page = paginator.paginate_queryset(reports, request)
         serializer = ReportSerializer(page, many=True)

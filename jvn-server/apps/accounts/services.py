@@ -276,7 +276,7 @@ def submit_business_certificate(*, user:Account, document):
 
 def approve_business_certificate(*, user: Account, company_id: int):
     if user.role != Account.ROLE_CHOICES.ADMIN:
-        raise PermissionError({'detail': 'You dont have the permission to approve the certificate'})  
+        raise PermissionDenied({'detail': 'You dont have the permission to approve the certificate'})  
     company = get_object_or_404(Company, pk = company_id)
     if company.business_cert_status != Company.CertStatus.PENDING:
         raise ValidationError({'detail': 'This certificate is not in PENDING status.'})
@@ -292,7 +292,7 @@ def approve_business_certificate(*, user: Account, company_id: int):
 
 def reject_business_certificate(*, user: Account, company_id, reason):
     if user.role != Account.ROLE_CHOICES.ADMIN:
-        raise PermissionError({'error':'You dont have the permission to reject the certificate'})
+        raise PermissionDenied({'error':'You dont have the permission to reject the certificate'})
     company = get_object_or_404(Company, pk = company_id)
     if company.business_cert_status != Company.CertStatus.PENDING:
         raise ValidationError({'detail': 'This certificate is not in PENDING status.'})

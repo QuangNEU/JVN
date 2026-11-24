@@ -6,7 +6,7 @@ from .serializers import  RejectJobPostSerializer, JobPostUpdateSerializer, Expi
 from rest_framework import status
 from core.pagnigation import StandardResultsPagination
 from .models import Category
-from core.permission import IsAuthenticatedAndNotLocked
+from core.permission import IsAuthenticatedAndNotLocked, have_role
 from .services import reject_job_post_service, approve_job_post_service, deny_category_service,create_category_service,approve_category_service,create_post_service,update_post_service,delete_post_service, save_job_service, resubmit_category_service
 from .selectors import get_admin_job_post_selector, get_expring_soon_jobs_selectors, get_admin_category_service,get_approved_category_service,public_read_post_service,company_read_post_service,get_post_detail_selector, is_saved_selector, get_saved_job_selector, get_my_category_requests_selector
 # Create your views here.
@@ -87,6 +87,7 @@ class ResubmitCategoryView(APIView):
 class CompanyJobPostView(APIView):
     permission_classes = [IsAuthenticatedAndNotLocked]
     def post(self, request):
+        have_role(user=request.user, role='company')
         serializer = JobPostCreateSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

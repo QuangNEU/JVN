@@ -42,8 +42,8 @@ def get_company_verification_level(*, company: Company) -> int:
 
 def get_business_cert_list_selector(*,user:Account, status_filter):
     if user.role != Account.ROLE_CHOICES.ADMIN:
-        return PermissionDenied({'detail':'You dont have the permission to read business cert'})
-    quert_set = Company.objects.select_related('account')
+        raise PermissionDenied({'detail':'You dont have the permission to read business cert'})
+    quert_set = Company.objects.select_related('account').order_by('-account__date_joined')
     if status_filter:
         quert_set = quert_set.filter(business_cert_status = status_filter)
     return quert_set.exclude(business_cert_status=Company.CertStatus.NOT_SUBMITTED)

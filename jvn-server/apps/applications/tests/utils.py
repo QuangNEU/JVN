@@ -55,12 +55,19 @@ def make_company(account=None, verification_level=2, **kwargs) -> Company:
     - level 1: email_verified=True, cert_status=PENDING
     - level 2: email_verified=True, cert_status=APPROVED
     """
+    name = kwargs.pop('name', None)
     if account is None:
+        account_kwargs = {'email_verified': (verification_level >= 1)}
+        if name:
+            account_kwargs['name'] = name
         account = make_account(
             role=Account.ROLE_CHOICES.COMPANY,
-            email_verified=(verification_level >= 1)
+            **account_kwargs
         )
     else:
+        if name and account.name != name:
+            account.name = name
+            account.save(update_fields=['name'])
         should_verify = verification_level >= 1
         if account.email_verified != should_verify:
             account.email_verified = should_verify
